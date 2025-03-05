@@ -1,0 +1,6 @@
+public/dat-bot.jpg
+public/health-ai.jpg
+public/llm-project.jpg
+public/fintech.jpg
+public/defense.jpg
+public/transport-ai.jpg
