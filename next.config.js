@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',  // Static HTML dışa aktarma için
   images: {
-    unoptimized: true,
+    unoptimized: true, // Netlify için gerekli
     remotePatterns: [
       {
         protocol: 'https',
@@ -9,6 +10,8 @@ const nextConfig = {
       },
     ],
   },
+  // Eğer GitHub Pages kullanacaksanız ve repo adınız farklıysa:
+  // basePath: '/repo-name',
 }
 
-module.exports = nextConfig 
+module.exports = nextConfig   
