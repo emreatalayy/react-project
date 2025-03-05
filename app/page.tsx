@@ -111,7 +111,7 @@ export default function Home() {
                 { icon: FaMedal, title: "Başarılar", value: "6+ Ödül" },
                 { icon: FaCode, title: "Projeler", value: "10+" },
                 { icon: FaRobot, title: "AI Modelleri", value: "15+" }
-              ].map((stat, index) => (
+              ].map((stat) => (
                 <div
                   key={stat.title}
                   className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center hover:bg-white/10 transition-colors duration-300"
