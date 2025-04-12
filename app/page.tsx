@@ -4,8 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FaGithub, FaLinkedin, FaEnvelope, FaMedal, FaCode, FaRobot } from 'react-icons/fa';
+import { useLanguage } from './context/LanguageContext';
 
 export default function Home() {
+  const { t } = useLanguage();
+
   return (
     <main className="min-h-screen">
       {/* Hero Section with Animated Background */}
@@ -17,7 +20,7 @@ export default function Home() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 py-20 w-full">
+        <div className="relative z-10 max-w-6xl mx-auto px-4 py-20">
           <div className="flex flex-col items-center text-center">
             {/* Profile Image with Glow Effect */}
             <motion.div
@@ -52,7 +55,7 @@ export default function Home() {
               transition={{ delay: 0.2 }}
               className="text-5xl md:text-7xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200"
             >
-              Yunus Emre Atalay
+              {t.hero.title}
             </motion.h1>
 
             <motion.h2
@@ -61,8 +64,17 @@ export default function Home() {
               transition={{ delay: 0.3 }}
               className="text-xl md:text-2xl text-blue-200 mb-6"
             >
-              Yapay Zeka Geliştirici | KTÜ Bilgisayar Mühendisliği
+              {t.hero.role}
             </motion.h2>
+
+            <motion.p 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-lg text-blue-100/80 max-w-2xl mb-8"
+            >
+              {t.hero.description}
+            </motion.p>
 
             {/* Social Links */}
             <motion.div
@@ -72,21 +84,9 @@ export default function Home() {
               className="flex space-x-6 mb-8"
             >
               {[
-                { 
-                  icon: FaGithub, 
-                  href: "https://github.com/emreatalayy", 
-                  label: "GitHub" 
-                },
-                { 
-                  icon: FaLinkedin, 
-                  href: "https://www.linkedin.com/in/emreatalayy/", 
-                  label: "LinkedIn" 
-                },
-                { 
-                  icon: FaEnvelope, 
-                  href: "mailto:emreatalay852@gmail.com", 
-                  label: "Email" 
-                }
+                { icon: FaGithub, href: "https://github.com/emreatalayy", label: "GitHub" },
+                { icon: FaLinkedin, href: "https://www.linkedin.com/in/emreatalayy/", label: "LinkedIn" },
+                { icon: FaEnvelope, href: "mailto:emreatalay852@gmail.com", label: "Email" }
               ].map((social) => (
                 <a
                   key={social.label}
@@ -105,12 +105,12 @@ export default function Home() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 px-4 w-full max-w-4xl mx-auto"
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
             >
               {[
-                { icon: FaMedal, title: "Başarılar", value: "6+ Ödül" },
-                { icon: FaCode, title: "Projeler", value: "10+" },
-                { icon: FaRobot, title: "AI Modelleri", value: "15+" }
+                { icon: FaMedal, title: t.stats.awards, value: t.stats.awardCount },
+                { icon: FaCode, title: t.stats.projects, value: t.stats.projectCount },
+                { icon: FaRobot, title: t.stats.aiModels, value: t.stats.modelCount }
               ].map((stat) => (
                 <div
                   key={stat.title}
@@ -128,9 +128,9 @@ export default function Home() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="mb-12 px-4 w-full max-w-4xl mx-auto"
+              className="mb-12"
             >
-              <h3 className="text-xl font-semibold text-white mb-4">Teknoloji Yığını</h3>
+              <h3 className="text-xl font-semibold text-white mb-4">{t.hero.techStack}</h3>
               <div className="flex flex-wrap justify-center gap-3">
                 {[
                   "Python",
@@ -162,7 +162,7 @@ export default function Home() {
                 href="/projects"
                 className="group relative inline-flex items-center justify-center px-8 py-3 overflow-hidden font-medium transition-all bg-gradient-to-r from-blue-600 to-purple-600 rounded-full hover:from-blue-700 hover:to-purple-700"
               >
-                <span className="relative text-white">Projelerimi Keşfet</span>
+                <span className="relative text-white">{t.hero.cta}</span>
                 <span className="absolute right-0 w-8 h-32 -mt-12 transition-all duration-1000 transform translate-x-12 bg-white opacity-10 rotate-12 group-hover:-translate-x-40 ease"></span>
               </Link>
             </motion.div>
@@ -182,6 +182,53 @@ export default function Home() {
         </motion.div>
       </section>
 
+      {/* Skills Section */}
+      <section className="py-16 px-4 md:px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <motion.h2 
+            className="text-3xl font-bold text-center mb-12 gradient-text"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            {t.skills.title}
+          </motion.h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: t.skills.ai,
+                description: t.skills.aiDesc,
+                icon: "🤖"
+              },
+              {
+                title: t.skills.dev,
+                description: t.skills.devDesc,
+                icon: "💻"
+              },
+              {
+                title: t.skills.data,
+                description: t.skills.dataDesc,
+                icon: "📊"
+              }
+            ].map((skill, index) => (
+              <motion.div
+                key={skill.title}
+                className="p-6 bg-gradient-to-br from-gray-50 to-white rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.2 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                <div className="text-4xl mb-4">{skill.icon}</div>
+                <h3 className="text-xl font-semibold mb-4">{skill.title}</h3>
+                <p className="text-gray-600">{skill.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Latest Achievements Section */}
       <section className="py-20 bg-gradient-to-b from-blue-900 to-gray-900">
         <div className="max-w-6xl mx-auto px-4">
@@ -191,30 +238,30 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-3xl font-bold text-center mb-12 text-white"
           >
-            Son Başarılar
+            {t.achievements.title}
           </motion.h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               {
-                title: "Vakıfbank Hack to the Future",
-                description: "En Yenilikçi Teknolojik Çözüm Ödülü",
-                date: "2024"
+                title: t.achievements.hackToFuture.title,
+                description: t.achievements.hackToFuture.description,
+                date: t.achievements.hackToFuture.date
               },
               {
-                title: "T3 AI Hackathon",
-                description: "LLM Projesi ile Üçüncülük",
-                date: "2024"
+                title: t.achievements.t3AI.title,
+                description: t.achievements.t3AI.description,
+                date: t.achievements.t3AI.date
               },
               {
-                title: "Teknofest Finalist",
-                description: "Sağlıkta Yapay Zeka Yarışması",
-                date: "2024"
+                title: t.achievements.teknofest.title,
+                description: t.achievements.teknofest.description,
+                date: t.achievements.teknofest.date
               },
               {
-                title: "GLOBAL-CENG",
-                description: "Bitirme Projeleri Birinciliği",
-                date: "2024"
+                title: t.achievements.globalCeng.title,
+                description: t.achievements.globalCeng.description,
+                date: t.achievements.globalCeng.date
               }
             ].map((achievement, index) => (
               <motion.div

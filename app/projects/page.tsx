@@ -4,80 +4,68 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Project } from '@/types/project';
 import Image from 'next/image';
-
-const projects: Project[] = [
-  {
-    id: '1',
-    title: 'D-A-T BOT - Duygusal Analiz Chatbot',
-    description: 'TÜBİTAK 2209-A destekli, duygu analizi yapabilen gelişmiş bir chatbot projesi',
-    longDescription: 'Bu proje (D-A-T BOT), görüntülerden özel geliştirdiğimiz CNN mimarisi ve metinden LSTM mimarisi kullanarak duygu analizi yaparak chatbotlara empati yeteneği kazandırmayı amaçladı. Ayrıca, LLM\'lerde sık görülen halüsinasyonları önlemek ve konu dışı sorulara cevap vermekten kaçınmak için RAG ve Prompt Engineering gibi yöntemler uygulandı. Turkcell Global Bilgi ve KTÜ işbirliğiyle ilk kez düzenlenen GLOBAL-CENG bitirme projeleri yarışmasında birincilik, KTÜ Bilgisayar Mühendisliği bitirme projelerinin yarıştığı 2024 CENG DEMO DAY yarışmasında üçüncülük elde ettik.',
-    technologies: ['Python', 'CNN', 'LSTM', 'RAG', 'LLM', 'TensorFlow','Deep Learning'],
-    imageUrl: '/dat-bot.jpg',
-    githubUrl: 'https://eklenecek'
-  },
-  {
-    id: '2',
-    title: 'Teknofest Sağlıkta Yapay Zeka',
-    description: 'Finalist olarak yer aldığımız sağlık alanında yapay zeka uygulaması',
-    longDescription: '2024 Teknofest Sağlıkta Yapay Zeka Yarışması\'nda takım kaptanı olarak finalistler arasında yer aldık. Ayrıca 2023\'te aynı yarışmada algoritma lideri olarak görev aldım. Proje, sağlık alanında yapay zeka teknolojilerinin kullanımını içermektedir.',
-    technologies: ['Python', 'Deep Learning','PyTorch'],
-    imageUrl: '/health-ai.jpg',
-    githubUrl: 'https://github.com/eklenecek'
-  },
-  {
-    id: '3',
-    title: 'T3 AI Hackathon LLM Projesi',
-    description: '2024 T3 AI Hackathon\'unda üçüncülük ödülü',
-    longDescription: '2024 T3 AI Hackathon LLM weight dosyaları ile proje oluşturma yarışmasında takım kaptanı olarak üçüncülük elde ettik. Proje, dil modelleri üzerine yenilikçi çözümler sunmaktadır.',
-    technologies: ['Python', 'LLM', 'NLP', 'Transformers', 'RAG','PyTorch'],
-    imageUrl: '/llm-project.jpg',
-    githubUrl: 'https://github.com/eklenecek'
-  },
-  {
-    id: '4',
-    title: 'Vakıfbank Hack to the Future',
-    description: 'En Yenilikçi Teknolojik Çözüm Ödülü',
-    longDescription: '2024 Vakıfbank Hack to the Future yarışmasında En Yenilikçi Teknolojik Çözüm Ödülünü kazandık. Projemiz finans teknolojileri alanında yenilikçi çözümler sunmaktadır.',
-  technologies: ['Python','FinTech','CNN', 'Machine Learning','RAG','LLM'],
-    imageUrl: '/fintech.jpg',
-    githubUrl: 'https://github.com/eklenecek'
-  },
-  {
-    id: '5',
-    title: 'Hava Savunma Sistemleri',
-    description: 'Teknofest 2024 Finalist Projesi',
-    longDescription: '2024 Teknofest Hava Savunma Sistemleri Yarışması\'nda yazılım lideri olarak finalistler arasında yer aldık. Proje, modern hava savunma sistemleri için yapay zeka destekli çözümler içermektedir.',
-    technologies: ['Python', 'C++', 'Computer Vision','OpenCV', 'Real-time Systems'],
-    imageUrl: '/defense.jpg',
-    githubUrl: 'https://github.com/eklenecek'
-  },
-  {
-    id: '6',
-    title: 'Ulaşımda Yapay Zeka',
-    description: 'Teknofest 2024 Yarışma Projesi',
-    longDescription: '2024 Teknofest Ulaşımda Yapay Zeka Yarışması\'nda takım kaptanı olarak yer aldık. Proje, akıllı ulaşım sistemleri için yapay zeka tabanlı çözümler sunmaktadır.',
-    technologies: ['Python', 'Computer Vision', 'Transformers'],
-    imageUrl: '/transport-ai.jpg',
-    githubUrl: 'https://github.com/eklenecek'
-  }
-];
-
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2
-    }
-  }
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
-};
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Projects() {
+  const { t, language } = useLanguage();
+  
+  const projects: Project[] = [
+    {
+      id: '1',
+      title: t.projects.datBot.title,
+      description: t.projects.datBot.description,
+      longDescription: t.projects.datBot.longDescription,
+      technologies: ['Python', 'CNN', 'LSTM', 'RAG', 'LLM', 'TensorFlow', 'PyTorch'],
+      imageUrl: '/dat-bot.jpg',
+      githubUrl: 'https://github.com/username/dat-bot'
+    },
+    {
+      id: '2',
+      title: t.projects.healthAI.title,
+      description: t.projects.healthAI.description,
+      longDescription: t.projects.healthAI.longDescription,
+      technologies: ['Python', 'Deep Learning', 'TensorFlow', 'OpenCV', 'Keras'],
+      imageUrl: '/health-ai.jpg',
+      githubUrl: 'https://github.com/username/health-ai'
+    },
+    {
+      id: '3',
+      title: t.projects.llmProject.title,
+      description: t.projects.llmProject.description,
+      longDescription: t.projects.llmProject.longDescription,
+      technologies: ['Python', 'LLM', 'NLP', 'Transformers', 'PyTorch'],
+      imageUrl: '/llm-project.jpg',
+      githubUrl: 'https://github.com/username/llm-project'
+    },
+    {
+      id: '4',
+      title: t.projects.fintech.title,
+      description: t.projects.fintech.description,
+      longDescription: t.projects.fintech.longDescription,
+      technologies: ['Python', 'AI', 'FinTech', 'Machine Learning'],
+      imageUrl: '/fintech.jpg',
+      githubUrl: 'https://github.com/username/fintech-solution'
+    },
+    {
+      id: '5',
+      title: t.projects.defense.title,
+      description: t.projects.defense.description,
+      longDescription: t.projects.defense.longDescription,
+      technologies: ['Python', 'C++', 'Computer Vision', 'Real-time Systems'],
+      imageUrl: '/defense.jpg',
+      githubUrl: 'https://github.com/username/air-defense'
+    },
+    {
+      id: '6',
+      title: t.projects.transport.title,
+      description: t.projects.transport.description,
+      longDescription: t.projects.transport.longDescription,
+      technologies: ['Python', 'Computer Vision', 'TensorFlow', 'IoT'],
+      imageUrl: '/transport-ai.jpg',
+      githubUrl: 'https://github.com/username/transport-ai'
+    }
+  ];
+
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [filter, setFilter] = useState<string>('all');
 
@@ -89,6 +77,51 @@ export default function Projects() {
     new Set(projects.flatMap(p => p.technologies))
   );
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
+  // Article translations
+  const translations = {
+    tr: {
+      title: 'Makaleler',
+      allTags: 'Tüm Etiketler',
+      readMore: 'Devamını Oku',
+      publishedOn: 'Yayınlanma:',
+      by: 'Yazar:',
+      filterByTag: 'Etikete Göre Filtrele:',
+      noArticles: 'Seçilen etiketle ilgili makale bulunamadı.',
+      backToArticles: 'Makalelere Dön',
+      author: 'Yazar:',
+      tags: 'Etiketler:',
+      articleNotFound: 'Makale bulunamadı.'
+    },
+    en: {
+      title: 'Articles',
+      allTags: 'All Tags',
+      readMore: 'Read More',
+      publishedOn: 'Published on:',
+      by: 'By:',
+      filterByTag: 'Filter by Tag:',
+      noArticles: 'No articles found with the selected tag.',
+      backToArticles: 'Back to Articles',
+      author: 'Author:',
+      tags: 'Tags:',
+      articleNotFound: 'Article not found.'
+    }
+  }[language];
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-20">
       <div className="max-w-6xl mx-auto px-4 md:px-6">
@@ -98,7 +131,7 @@ export default function Projects() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          Projeler
+          {t.projects.title}
         </motion.h1>
 
         <motion.div
@@ -115,7 +148,7 @@ export default function Projects() {
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
-            Tümü
+            {t.projects.filterAll}
           </button>
           {uniqueTechnologies.map((tech) => (
             <button
