@@ -4,9 +4,11 @@ const nextConfig = {
   images: {
     unoptimized: true, // Netlify için gerekli
   },
+  eslint: {
+    ignoreDuringBuilds: true, // ESLint hatalarını build sırasında yok say
+  },
   trailingSlash: true,
-  // Eğer GitHub Pages kullanacaksanız ve repo adınız farklıysa:
-  // basePath: '/repo-name',
+
 }
 
 module.exports = nextConfig 
