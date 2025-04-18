@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  reactStrictMode: true, // React Strict Mode'u etkinleştir
 };
 
 export default nextConfig;
