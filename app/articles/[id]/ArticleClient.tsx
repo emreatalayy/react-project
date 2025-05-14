@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FaArrowLeft } from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
-import { articles } from './page';
+import { articles } from '../data';
 
 export default function ArticleClient() {
   const params = useParams();

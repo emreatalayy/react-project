@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
-import { articles } from './[id]/page';
+import { articles } from './data';
 
 export default function Articles() {
   const { language } = useLanguage();
