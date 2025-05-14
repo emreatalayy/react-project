@@ -92,36 +92,6 @@ export default function Projects() {
     show: { opacity: 1, y: 0 }
   };
 
-  // Article translations
-  const translations = {
-    tr: {
-      title: 'Makaleler',
-      allTags: 'Tüm Etiketler',
-      readMore: 'Devamını Oku',
-      publishedOn: 'Yayınlanma:',
-      by: 'Yazar:',
-      filterByTag: 'Etikete Göre Filtrele:',
-      noArticles: 'Seçilen etiketle ilgili makale bulunamadı.',
-      backToArticles: 'Makalelere Dön',
-      author: 'Yazar:',
-      tags: 'Etiketler:',
-      articleNotFound: 'Makale bulunamadı.'
-    },
-    en: {
-      title: 'Articles',
-      allTags: 'All Tags',
-      readMore: 'Read More',
-      publishedOn: 'Published on:',
-      by: 'By:',
-      filterByTag: 'Filter by Tag:',
-      noArticles: 'No articles found with the selected tag.',
-      backToArticles: 'Back to Articles',
-      author: 'Author:',
-      tags: 'Tags:',
-      articleNotFound: 'Article not found.'
-    }
-  }[language];
-
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-20">
       <div className="max-w-6xl mx-auto px-4 md:px-6">
