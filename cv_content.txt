@@ -1,0 +1,99 @@
+Yunus  Emre  Atalay  
+emreatalay852@gmail.com  ❖ (506)  056-3350  ❖ İstanbul -Trabzon  ❖  GitHub  ❖ Linkedin  
+ 
+ 
+İŞ DENEYİMİ  
+ 
+Zephlex Finansal Teknolojiler AŞ      Aralık  2025  – Şuan  
+Yapay Zekâ  Mühendisi        Uzaktan  
+▪ Finansal teknolojiler,R AG,AI Agent sistemleri , n8n üzerinden otomasyon proje leri üzerine çalış ıyorum.  
+ 
+MİNTY TEKNOLOJİ                                                                                                     Mayıs  2025  – Kasım 2025  
+Yapay Zekâ  Mühendisi  Trabzon,  TR 
+▪ Açıklanabilir Yapay Zekâ  (XAI)  ve Büyük Dil Modelleri (LLM)  üzerinde çalışıyorum. XAI tekniklerini ve 
+LLM mimarilerini geliştirmek ve denemek için bilgi ve deneyimimi uygulamaktayım.  
+ 
+  AD-ASTRA  TEKNOLOJİ GRUP                 Ağustos  2024  – Eylül  2024     
+  Stajyer Mühendis  Ankara,  TR 
+▪ Unity ile oyun geliştirme , pekiştirmeli öğrenme ile bir yapay zekâ model leri eğitimi üzerine çalıştım . Unity  
+ortamında pekiştirmeli öğrenme  tekniklerini kullanarak gerçek senaryo A I modeli uygulayıp eğittim.  
+ 
+VANEMAR  T E K N O L O J İ           Temmuz  2023  – Eylül  2023  
+Stajyer Mühendis       Ankara,  TR 
+▪ Doğal Dil İşleme (NLP)  alanında küçük ölçekli araştırmalar yaptım. Yapay zekâ algoritmalarının  
+denizcilik ve su araçları sektöründeki potansiyel uygulamalarını keşfettim.  LLM fine tuning 
+işlemlerini araştırdım  
+ 
+KTÜ  Yapay Zekâ  Kulübü                                                                                          Temmuz  2022  – Haziran  2024  
+Yönetim Kurulu Başkanı  Trabzon,  TR 
+ 
+Akademik hayatım boyunca, ikinci sınıftan mezuniyete kadar çeşitli Teknofest  projelerinde farklı kulüplerle yer 
+aldım. Katıldığım yarışmalar, üstlendiğim roller ve ulaştığım aşamalar:  
+ 
+▪ 2025 Teknofest Türkçe Doğal Dil İşleme Yarışması - Takım Kaptanı - 3.’lük  
+▪ 2025 Teknofest Savaşan İHA - Finalist  
+▪ 2024 Vakıfbank Hack to the Future Yarışması - En Yenilikçi Teknolojik Çözüm Ödülü  
+▪ 2024 Teknofest Sağlıkta Yapay Zekâ  Yarışması - Takım Kaptanı - Finalist  
+▪ 2024 T3 AI Hackathon LLM Ağırlık Dosyaları ile Proje Yarışması - Takım Kaptanı - 3.’lük  
+▪ 2024 Teknofest  Hava Savunma Sistemleri Yarışması - Yazılım Lideri - Finalist  
+▪ 2024 Teknofest Ulaştırmada Yapay Zekâ  Yarışması - Takım Kaptanı  
+▪ 2023 Teknofest Sağlıkta Yapay Zekâ  Yarışması - Takım Kaptanı  
+ 
+EĞİTİM  
+Karadeniz  Teknik Üniversitesi     07,24  
+Bilgisayar Mühendisliği Lisans         Trabzon/TR  
+▪ GPA:  3.03/4.0  
+▪ KTÜ Yapay Zeka Kulübü Yönetim Kurulu Başkan Yardımcısı ve Ar -Ge Başkanı  
+ 
+Karadeniz  Teknik Üniversitesi                                                                                                            Devam ediyor  
+Bilgisayar Mühendisliği Yüksek Lisans        Trabzon/TR  
+▪ GPA:  3./4.0 
+ 
+YETENEKLER  
+Python,  C/C++, C#, OpenCV, deep  learning,  machine  learning,  data visuali zation, data  analytics,  multithreaded  
+programming,  teamwork,  communicate  research  and algorithm  development;  TensorFlow,  PyTorch,  Keras,  
+Sklearn,  Numpy, Pandas,  Matplotlib libraries;  large language models  (LLM)  
+ 
+ 
+ 
+PROJELER  
+ 
+KTÜ  BİTİRME PROJESİ –TURKCELL  GLOBAL  BİLGİ  
+ Kasım  2023  – Haziran  2024  
+D-A-T BOT  adlı projemiz, özel geliştirdiğimiz CNN  mimarisi ile görüntülerden, LSTM  mimarisi ile metinlerden 
+duygu anali zi yaparak Chat botlara empati kazandırmayı hedefledi. Ayrıca LLM’lerde yaygın görülen halüsinasyonları 
+önlemek ve konu dışı sorulara cevap vermemek için RAG  ve Prompt Engineering  yöntemleri uygulandı.  
+▪ TÜBİTAK 2209 -A programı tarafından “Duygu Temelli Analiz Chatbot” projemiz onaylandı.  
+▪ Turkcell Global Bilgi ve KTÜ  iş birliği ile düzenlenen GLOBAL -CENG  mezuniyet proje yarışmasında 1. 
+olduk.  
+▪ 2024 CENG DEMO DAY yarışmasında KTÜ Bilgisayar Mühendisliği bitirme projeleri arasında 3. Olduk . 
+ 
+VAKIFBANK HACK TO THE FUTURE  
+                       Aralık 2024  
+ 
+Vakıfbank “Hack to the Future” projesi, kullanıcıların duygu durumlarını anlayarak empati kurabilen ve 
+kişiselleştirilmiş bankacılık deneyimi sunan bir yapay zekâ destekli sanal asistan geliştirmeyi hedefler. Proje; 
+müşteri deneyimini artırmak, operasyonel verimliliği yükseltmek ve dijital kanallarda hiperotomasyon 
+sağlamak amacıyla tasarlanmıştır. Yüz tanıma, avatar kişiselleştirme ve doğal dil işleme teknikleriyle 
+desteklenen sistem, kullanıcıyla etkileşim kurarken duygu analizine dayalı karar mekanizmalarıyla farklı bir 
+müşteri hizmeti yaklaşımı sunar.  
+ 
+2025 TÜRKÇE DOĞAL DİL İŞLEME YARIŞMASI PROJESİ  
+             Ağustos 2025  
+ 
+Turkcell müşteri hizmetleri senaryosunu simüle eden LLM tabanlı bir yapay zekâ  ajanıdır . Proje, React ve 
+TypeScript ile geliştirilen bir ön yüz, FastAPI ve PyTorch tabanlı bir arka uç, özelleştirilebilen  dil modeli ve 
+Coqui XTTS seslendirme sistemi entegrasyonlarından oluşan full -stack bir yapıya sahiptir. Gerçek zamanlı 
+konuşma, bellek yönetimi ve doğal dil anlama özellikleriyle kullanıcıyla etkileşim kurabilen bu sistem, 
+müşterilere no -code AI asistanları üretmesini sağlamaktadır . Projemiz senaryo kategorisinde 3. Olmuştur.  
+ 
+N8N AI AGENT OTOMASYON  
+             Eylül 2025  
+ 
+n8n tabanlı WhatsApp AI Agent projem, herhangi bir müşteri için özelleştirilebilen akıllı sohbet otomasyon 
+sistemidir. Evolution API aracılığıyla WhatsApp’a entegre edilmiş bu yapı, kullanıcı mesajlarını alıp LLM 
+bir yapay zekâ motoru ile anlamlandırır ve yanıtlar üretir. Supabase veritabanı, hafıza ve kullanıcı geçmişi 
+yönetimi için kullanılırken; n8n platformu da akış kontrolü, API entegrasyonları ve görev otomasyonlarını 
+sağlar. Sistem; sipariş sorgulama, kargo takibi, bilgi verme veya destek taleplerine anlık, doğal dilde yanıt 
+verebilen modüler bir yapay zekâ asistanı sunar.  
+ 

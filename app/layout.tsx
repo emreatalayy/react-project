@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from './components/Navbar';
-import { LanguageProvider } from './context/LanguageContext';
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Yunus Emre Atalay - AI Developer",
-  description: "AI and machine learning developer specialized in innovative solutions",
+  title: "Yunus Emre Atalay | Computer Engineer",
+  description: "Computer Engineer & AI Specialist Portfolio",
 };
 
 export default function RootLayout({
@@ -17,12 +15,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="tr">
+    <html lang="en">
       <body className={inter.className}>
-        <LanguageProvider>
-          <Navbar />
-          {children}
-        </LanguageProvider>
+        {children}
       </body>
     </html>
   );

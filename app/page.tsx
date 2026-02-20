@@ -1,285 +1,255 @@
 'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { FaGithub, FaLinkedin, FaEnvelope, FaMedal, FaCode, FaRobot } from 'react-icons/fa';
-import { useLanguage } from './context/LanguageContext';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaGithub, FaLinkedin, FaEnvelope, FaTerminal, FaCode, FaMicrochip, FaFolderOpen, FaUserSecret } from 'react-icons/fa';
+import BootSequence from './components/BootSequence';
+import MatrixBackground from './components/MatrixBackground';
+import TerminalWindow from './components/TerminalWindow';
+import { cvData } from './data/cv';
 
 export default function Home() {
-  const { t } = useLanguage();
+  const [booted, setBooted] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [showCursor, setShowCursor] = useState(true);
+
+  // Blinking cursor effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowCursor(prev => !prev);
+    }, 530);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!booted) {
+    return <BootSequence onComplete={() => setBooted(true)} />;
+  }
 
   return (
-    <main className="min-h-screen">
-      {/* Hero Section with Animated Background */}
-      <section className="min-h-screen relative overflow-hidden bg-gradient-to-b from-gray-900 via-gray-800 to-blue-900 flex items-center justify-center pt-16">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute w-full h-full bg-[url('/grid.svg')] opacity-20"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 via-purple-500/10 to-pink-500/10 animate-gradient"></div>
+    <main className="min-h-screen relative p-4 md:p-8 font-mono text-[#00ff41] overflow-hidden">
+      <MatrixBackground />
+      <div className="scanline z-50 pointer-events-none"></div>
+
+      {/* Header / Status Bar */}
+      <header className="fixed top-0 left-0 w-full bg-black/80 border-b border-[#00ff41] z-40 px-4 py-2 flex justify-between items-center backdrop-blur-sm">
+        <div className="flex items-center gap-2">
+          <FaTerminal className="text-[#00ff41]" />
+          <span className="font-bold tracking-widest">YEA-OS v2.0.24</span>
+        </div>
+        <div className="text-xs md:text-sm">
+          STATUS: <span className="text-[#00ff41] animate-pulse">ONLINE</span> | USER: GUEST
+        </div>
+      </header>
+
+      <div className="mt-16 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+
+        {/* Left Sidebar - Navigation / Profile */}
+        <div className="lg:col-span-3 space-y-6">
+          <TerminalWindow title="USER_PROFILE" id="profile">
+            <div className="flex flex-col items-center mb-4">
+              <div className="w-32 h-32 rounded-full border-2 border-[#00ff41] overflow-hidden mb-4 relative group">
+                <div className="absolute inset-0 bg-[#00ff41] opacity-20 group-hover:opacity-0 transition-opacity"></div>
+                {/* Placeholder for profile image if needed, or keeping it digital */}
+                <FaUserSecret className="w-full h-full p-4 text-[#00ff41]" />
+              </div>
+              <h1 className="text-xl font-bold text-center glitch" data-text={cvData.personal.name}>{cvData.personal.name}</h1>
+              <p className="text-xs text-center text-[#00ff41]/80">{cvData.personal.title}</p>
+            </div>
+
+            <div className="space-y-2 text-sm">
+              <div className="border border-[#00ff41]/30 p-2 hover:bg-[#00ff41]/10 transition-colors cursor-pointer">
+                <span className="text-[#00ff41]">{`>`} LOCATION:</span> {cvData.personal.location}
+              </div>
+              <div className="border border-[#00ff41]/30 p-2 hover:bg-[#00ff41]/10 transition-colors cursor-pointer break-all">
+                <span className="text-[#00ff41]">{`>`} EMAIL:</span> {cvData.personal.email}
+              </div>
+
+              <div className="flex justify-center gap-4 mt-4 pt-4 border-t border-[#00ff41]/30">
+                <a href={cvData.personal.social.github} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors"><FaGithub size={24} /></a>
+                <a href={cvData.personal.social.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors"><FaLinkedin size={24} /></a>
+              </div>
+            </div>
+          </TerminalWindow>
+
+          <TerminalWindow title="SYSTEM_NAVIGATION">
+            <nav className="flex flex-col gap-2">
+              {[
+                { id: 'overview', label: 'OVERVIEW', icon: FaMicrochip },
+                { id: 'experience', label: 'EXPERIENCE_LOGS', icon: FaTerminal },
+                { id: 'projects', label: 'PROJECT_FILES', icon: FaFolderOpen },
+                { id: 'skills', label: 'INSTALLED_MODULES', icon: FaCode },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex items-center gap-3 p-2 text-left transition-all duration-300 border ${activeTab === item.id ? 'bg-[#00ff41] text-black border-[#00ff41]' : 'border-transparent hover:border-[#00ff41] hover:text-[#00ff41]'}`}
+                >
+                  <item.icon />
+                  <span>{item.label}</span>
+                  {activeTab === item.id && <span className="ml-auto animate-pulse">_</span>}
+                </button>
+              ))}
+            </nav>
+          </TerminalWindow>
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 py-20">
-          <div className="flex flex-col items-center text-center">
-            {/* Profile Image with Glow Effect */}
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="relative mb-8"
-            >
-              <div className="absolute inset-0 bg-blue-500 rounded-full blur-2xl opacity-30 animate-pulse"></div>
-              <Image
-                src="/profile.jpg"
-                alt="Yunus Emre Atalay"
-                width={200}
-                height={200}
-                className="rounded-full border-4 border-white/10 shadow-2xl relative z-10"
-                priority
-              />
+        {/* Main Content Area */}
+        <div className="lg:col-span-9">
+          <AnimatePresence mode="wait">
+
+            {activeTab === 'overview' && (
               <motion.div
+                key="overview"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                className="absolute -bottom-4 -right-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium shadow-lg whitespace-nowrap z-20"
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
               >
-                AI Developer
+                <TerminalWindow title="README.MD">
+                  <div className="prose prose-invert max-w-none text-[#00ff41]">
+                    <h2 className="text-xl font-bold border-b border-[#00ff41] pb-2 mb-4">
+                      {`>`} SYSTEM_INITIATED
+                    </h2>
+                    <p className="mb-4">
+                      Welcome to my digital workspace. I am a Computer Engineer specialized in Artificial Intelligence and Full Stack Development.
+                      My system is optimized for solving complex problems using cutting-edge algorithms.
+                    </p>
+                    <p>
+                      Current Objective: Building autonomous agents and scalable AI solutions.
+                    </p>
+                    <div className="mt-6 flex flex-wrap gap-4">
+                      <span className="bg-[#00ff41]/20 border border-[#00ff41] px-4 py-2 rounded">
+                        Target: AI Engineering
+                      </span>
+                      <span className="bg-[#00ff41]/20 border border-[#00ff41] px-4 py-2 rounded">
+                        Status: Open for Work
+                      </span>
+                    </div>
+                  </div>
+                </TerminalWindow>
+
+                {/* Latest Achievement Highlight */}
+                <TerminalWindow title="LATEST_ACHIEVEMENT_LOG">
+                  <div className="flex items-start gap-4">
+                    <div className="text-4xl text-yellow-400">🏆</div>
+                    <div>
+                      <h3 className="text-lg font-bold">{cvData.achievements[0]}</h3>
+                      <p className="opacity-70 mt-1 text-sm">Successfully executed high-priority task.</p>
+                    </div>
+                  </div>
+                </TerminalWindow>
               </motion.div>
-            </motion.div>
+            )}
 
-            {/* Name and Title with Gradient */}
-            <motion.h1
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-5xl md:text-7xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200"
-            >
-              {t.hero.title}
-            </motion.h1>
-
-            <motion.h2
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-xl md:text-2xl text-blue-200 mb-6"
-            >
-              {t.hero.role}
-            </motion.h2>
-
-            <motion.p 
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-lg text-blue-100/80 max-w-2xl mb-8"
-            >
-              {t.hero.description}
-            </motion.p>
-
-            {/* Social Links */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="flex space-x-6 mb-8"
-            >
-              {[
-                { icon: FaGithub, href: "https://github.com/emreatalayy", label: "GitHub" },
-                { icon: FaLinkedin, href: "https://www.linkedin.com/in/emreatalayy/", label: "LinkedIn" },
-                { icon: FaEnvelope, href: "mailto:emreatalay852@gmail.com", label: "Email" }
-              ].map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-200 hover:text-white transition-colors duration-300"
-                >
-                  <social.icon size={28} />
-                </a>
-              ))}
-            </motion.div>
-
-            {/* Quick Stats */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
-            >
-              {[
-                { icon: FaMedal, title: t.stats.awards, value: t.stats.awardCount },
-                { icon: FaCode, title: t.stats.projects, value: t.stats.projectCount },
-                { icon: FaRobot, title: t.stats.aiModels, value: t.stats.modelCount }
-              ].map((stat) => (
-                <div
-                  key={stat.title}
-                  className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center hover:bg-white/10 transition-colors duration-300"
-                >
-                  <stat.icon className="mx-auto mb-3 text-blue-400" size={24} />
-                  <h3 className="text-lg font-semibold text-white mb-1">{stat.title}</h3>
-                  <p className="text-blue-200">{stat.value}</p>
-                </div>
-              ))}
-            </motion.div>
-
-            {/* Tech Stack */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="mb-12"
-            >
-              <h3 className="text-xl font-semibold text-white mb-4">{t.hero.techStack}</h3>
-              <div className="flex flex-wrap justify-center gap-3">
-                {[
-                  "Python",
-                  "TensorFlow",
-                  "PyTorch",
-                  "Computer Vision",
-                  "NLP",
-                  "Deep Learning",
-                  "C++",
-                  "C#"
-                ].map((tech) => (
-                  <span
-                    key={tech}
-                    className="px-4 py-2 bg-white/5 backdrop-blur-lg rounded-full text-blue-200 hover:bg-white/10 transition-colors duration-300"
-                  >
-                    {tech}
-                  </span>
+            {activeTab === 'experience' && (
+              <motion.div
+                key="experience"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {cvData.experience.map((exp, index) => (
+                  <TerminalWindow key={index} title={`LOG_${index + 1}_${exp.company.replace(/\s/g, '_').toUpperCase()}`}>
+                    <div className="text-sm md:text-base">
+                      <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
+                        <span className="font-bold text-lg text-[#00ff41]">{`>`} {exp.role}</span>
+                        <span className="text-[#00ff41]/70">[{exp.date}]</span>
+                      </div>
+                      <div className="mb-2 text-[#00ff41]/80">@{exp.company} {exp.location ? `// ${exp.location}` : ''}</div>
+                      <p className="opacity-90 leading-relaxed border-l-2 border-[#00ff41] pl-4">
+                        {exp.description}
+                      </p>
+                    </div>
+                  </TerminalWindow>
                 ))}
-              </div>
-            </motion.div>
 
-            {/* CTA Button */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.7 }}
-            >
-              <Link
-                href="/projects"
-                className="group relative inline-flex items-center justify-center px-8 py-3 overflow-hidden font-medium transition-all bg-gradient-to-r from-blue-600 to-purple-600 rounded-full hover:from-blue-700 hover:to-purple-700"
-              >
-                <span className="relative text-white">{t.hero.cta}</span>
-                <span className="absolute right-0 w-8 h-32 -mt-12 transition-all duration-1000 transform translate-x-12 bg-white opacity-10 rotate-12 group-hover:-translate-x-40 ease"></span>
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-        >
-          <div className="w-6 h-10 border-2 border-blue-200 rounded-full p-1">
-            <div className="w-1.5 h-3 bg-blue-200 rounded-full animate-bounce mx-auto"></div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Skills Section */}
-      <section className="py-16 px-4 md:px-6 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <motion.h2 
-            className="text-3xl font-bold text-center mb-12 gradient-text"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            {t.skills.title}
-          </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: t.skills.ai,
-                description: t.skills.aiDesc,
-                icon: "🤖"
-              },
-              {
-                title: t.skills.dev,
-                description: t.skills.devDesc,
-                icon: "💻"
-              },
-              {
-                title: t.skills.data,
-                description: t.skills.dataDesc,
-                icon: "📊"
-              }
-            ].map((skill, index) => (
-              <motion.div
-                key={skill.title}
-                className="p-6 bg-gradient-to-br from-gray-50 to-white rounded-xl shadow-lg hover:shadow-xl transition-shadow"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.2 }}
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="text-4xl mb-4">{skill.icon}</div>
-                <h3 className="text-xl font-semibold mb-4">{skill.title}</h3>
-                <p className="text-gray-600">{skill.description}</p>
+                <div className="my-8 border-t border-dashed border-[#00ff41]/50 pt-4">
+                  <h3 className="text-lg font-bold mb-4">{`>`} EDUCATION_HISTORY</h3>
+                  {cvData.education.map((edu, index) => (
+                    <div key={index} className="mb-6 ml-4">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-bold text-white">{edu.school}</span>
+                        <span className="text-xs opacity-70">{edu.date}</span>
+                      </div>
+                      <div className="text-sm opacity-80">{edu.degree}</div>
+                      <div className="text-xs opacity-60">GPA: {edu.gpa}</div>
+                      {edu.details && <div className="text-xs mt-1 text-[#00ff41]/60">{edu.details}</div>}
+                    </div>
+                  ))}
+                </div>
               </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+            )}
 
-      {/* Latest Achievements Section */}
-      <section className="py-20 bg-gradient-to-b from-blue-900 to-gray-900">
-        <div className="max-w-6xl mx-auto px-4">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl font-bold text-center mb-12 text-white"
-          >
-            {t.achievements.title}
-          </motion.h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              {
-                title: t.achievements.hackToFuture.title,
-                description: t.achievements.hackToFuture.description,
-                date: t.achievements.hackToFuture.date
-              },
-              {
-                title: t.achievements.t3AI.title,
-                description: t.achievements.t3AI.description,
-                date: t.achievements.t3AI.date
-              },
-              {
-                title: t.achievements.teknofest.title,
-                description: t.achievements.teknofest.description,
-                date: t.achievements.teknofest.date
-              },
-              {
-                title: t.achievements.globalCeng.title,
-                description: t.achievements.globalCeng.description,
-                date: t.achievements.globalCeng.date
-              }
-            ].map((achievement, index) => (
+            {activeTab === 'projects' && (
               <motion.div
-                key={achievement.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white/5 backdrop-blur-lg rounded-xl p-6 hover:bg-white/10 transition-all duration-300"
+                key="projects"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
-                <div className="text-blue-400 text-sm mb-2">{achievement.date}</div>
-                <h3 className="text-xl font-semibold text-white mb-2">{achievement.title}</h3>
-                <p className="text-blue-200">{achievement.description}</p>
+                {cvData.projects.map((project, index) => (
+                  <TerminalWindow key={index} title={`EXEC_${project.title.substring(0, 10)}...`} className="h-full">
+                    <div className="h-full flex flex-col">
+                      <h3 className="font-bold text-lg mb-2 text-white">{project.title}</h3>
+                      <div className="text-xs opacity-50 mb-4">{project.date}</div>
+                      <p className="text-sm opacity-80 flex-grow">
+                        {project.description}
+                      </p>
+                      <div className="mt-4 pt-4 border-t border-[#00ff41]/20 flex justify-end">
+                        <button className="text-xs border border-[#00ff41] px-2 py-1 hover:bg-[#00ff41] hover:text-black transition-colors">
+                          EXECUTE
+                        </button>
+                      </div>
+                    </div>
+                  </TerminalWindow>
+                ))}
               </motion.div>
-            ))}
-          </div>
+            )}
+
+            {activeTab === 'skills' && (
+              <motion.div
+                key="skills"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <TerminalWindow title="INSTALLED_PACKAGES">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {cvData.skills.map((skill, index) => (
+                      <div key={index} className="group relative border border-[#00ff41]/30 p-3 hover:bg-[#00ff41]/10 transition-colors pointer-events-auto">
+                        <div className="text-xs opacity-50 mb-1">pkg_{index.toString().padStart(3, '0')}</div>
+                        <div className="font-bold">{skill}</div>
+                        <div className="absolute top-0 right-0 w-2 h-2 bg-[#00ff41] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      </div>
+                    ))}
+                  </div>
+                </TerminalWindow>
+
+                <TerminalWindow title="ACHIEVEMENTS_LOG">
+                  <ul className="space-y-3">
+                    {cvData.achievements.map((achievement, index) => (
+                      <li key={index} className="flex gap-2 items-start text-sm hover:text-white transition-colors cursor-default">
+                        <span className="text-[#00ff41] shrink-0">[{index.toString().padStart(2, '0')}]</span>
+                        <span>{achievement}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </TerminalWindow>
+              </motion.div>
+            )}
+
+          </AnimatePresence>
         </div>
-      </section>
+      </div>
+
+      {/* Footer */}
+      <footer className="fixed bottom-0 left-0 w-full text-center text-xs opacity-50 p-2 pointer-events-none z-40 bg-black/50">
+        SYSTEM_ID: YEA-001 | SECURE_CONNECTION_ESTABLISHED | {showCursor ? '_' : ' '}
+      </footer>
     </main>
   );
 }
