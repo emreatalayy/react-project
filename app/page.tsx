@@ -34,10 +34,10 @@ export default function Home() {
       <header className="fixed top-0 left-0 w-full bg-black/80 border-b border-[#00ff41] z-40 px-4 py-2 flex justify-between items-center backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <FaTerminal className="text-[#00ff41]" />
-          <span className="font-bold tracking-widest">YEA-OS v2.0.24</span>
+          <span className="font-bold tracking-widest">YEA-OS v2.0.26</span>
         </div>
         <div className="text-xs md:text-sm">
-          STATUS: <span className="text-[#00ff41] animate-pulse">ONLINE</span> | USER: GUEST
+          DURUM: <span className="text-[#00ff41] animate-pulse">ÇEVRİMİÇİ</span> | KULLANICI: MİSAFİR
         </div>
       </header>
 
@@ -45,7 +45,7 @@ export default function Home() {
 
         {/* Left Sidebar - Navigation / Profile */}
         <div className="lg:col-span-3 space-y-6">
-          <TerminalWindow title="USER_PROFILE" id="profile">
+          <TerminalWindow title="KULLANICI_PROFİLİ" id="profile">
             <div className="flex flex-col items-center mb-4">
               <div className="w-32 h-32 rounded-full border-2 border-[#00ff41] overflow-hidden mb-4 relative group">
                 <div className="absolute inset-0 bg-[#00ff41] opacity-20 group-hover:opacity-0 transition-opacity"></div>
@@ -58,10 +58,10 @@ export default function Home() {
 
             <div className="space-y-2 text-sm">
               <div className="border border-[#00ff41]/30 p-2 hover:bg-[#00ff41]/10 transition-colors cursor-pointer">
-                <span className="text-[#00ff41]">{`>`} LOCATION:</span> {cvData.personal.location}
+                <span className="text-[#00ff41]">{`>`} KONUM:</span> {cvData.personal.location}
               </div>
               <div className="border border-[#00ff41]/30 p-2 hover:bg-[#00ff41]/10 transition-colors cursor-pointer break-all">
-                <span className="text-[#00ff41]">{`>`} EMAIL:</span> {cvData.personal.email}
+                <span className="text-[#00ff41]">{`>`} E-POSTA:</span> {cvData.personal.email}
               </div>
 
               <div className="flex justify-center gap-4 mt-4 pt-4 border-t border-[#00ff41]/30">
@@ -71,13 +71,13 @@ export default function Home() {
             </div>
           </TerminalWindow>
 
-          <TerminalWindow title="SYSTEM_NAVIGATION">
+          <TerminalWindow title="SİSTEM_NAVİGASYON">
             <nav className="flex flex-col gap-2">
               {[
-                { id: 'overview', label: 'OVERVIEW', icon: FaMicrochip },
-                { id: 'experience', label: 'EXPERIENCE_LOGS', icon: FaTerminal },
-                { id: 'projects', label: 'PROJECT_FILES', icon: FaFolderOpen },
-                { id: 'skills', label: 'INSTALLED_MODULES', icon: FaCode },
+                { id: 'overview', label: 'GENEL_BAKIŞ', icon: FaMicrochip },
+                { id: 'experience', label: 'DENEYİM_KAYITLARI', icon: FaTerminal },
+                { id: 'projects', label: 'PROJE_DOSYALARI', icon: FaFolderOpen },
+                { id: 'skills', label: 'YÜKLÜ_MODÜLLER', icon: FaCode },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -105,38 +105,41 @@ export default function Home() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <TerminalWindow title="README.MD">
+                <TerminalWindow title="BENİOKU.MD">
                   <div className="prose prose-invert max-w-none text-[#00ff41]">
                     <h2 className="text-xl font-bold border-b border-[#00ff41] pb-2 mb-4">
-                      {`>`} SYSTEM_INITIATED
+                      {`>`} SİSTEM_BAŞLATILDI
                     </h2>
                     <p className="mb-4">
-                      Welcome to my digital workspace. I am a Computer Engineer specialized in Artificial Intelligence and Full Stack Development.
-                      My system is optimized for solving complex problems using cutting-edge algorithms.
+                      Dijital çalışma alanıma hoş geldiniz. Yapay Zekâ ve Full Stack Geliştirme alanlarında uzmanlaşmış bir Bilgisayar Mühendisiyim.
+                      Sistemim, ileri düzey algoritmalar kullanarak karmaşık problemleri çözmek için optimize edilmiştir.
                     </p>
                     <p>
-                      Current Objective: Building autonomous agents and scalable AI solutions.
+                      Mevcut Hedef: Otonom ajanlar ve ölçeklenebilir yapay zekâ çözümleri geliştirmek.
                     </p>
                     <div className="mt-6 flex flex-wrap gap-4">
                       <span className="bg-[#00ff41]/20 border border-[#00ff41] px-4 py-2 rounded">
-                        Target: AI Engineering
+                        Hedef: Yapay Zekâ Mühendisliği
                       </span>
                       <span className="bg-[#00ff41]/20 border border-[#00ff41] px-4 py-2 rounded">
-                        Status: Open for Work
+                        Durum: Çalışıyorum
                       </span>
                     </div>
                   </div>
                 </TerminalWindow>
 
                 {/* Latest Achievement Highlight */}
-                <TerminalWindow title="LATEST_ACHIEVEMENT_LOG">
-                  <div className="flex items-start gap-4">
-                    <div className="text-4xl text-yellow-400">🏆</div>
-                    <div>
-                      <h3 className="text-lg font-bold">{cvData.achievements[0]}</h3>
-                      <p className="opacity-70 mt-1 text-sm">Successfully executed high-priority task.</p>
-                    </div>
-                  </div>
+                <TerminalWindow title="SON_BAŞARILAR">
+                  <ul className="space-y-3">
+                    {cvData.achievements.slice(0, 3).map((achievement, index) => (
+                      <li key={index} className="flex gap-3 items-start">
+                        <span className="text-2xl text-yellow-400 shrink-0">🏆</span>
+                        <div>
+                          <h3 className="text-sm font-bold">{achievement}</h3>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 </TerminalWindow>
               </motion.div>
             )}
@@ -165,7 +168,7 @@ export default function Home() {
                 ))}
 
                 <div className="my-8 border-t border-dashed border-[#00ff41]/50 pt-4">
-                  <h3 className="text-lg font-bold mb-4">{`>`} EDUCATION_HISTORY</h3>
+                  <h3 className="text-lg font-bold mb-4">{`>`} EĞİTİM_GEÇMİŞİ</h3>
                   {cvData.education.map((edu, index) => (
                     <div key={index} className="mb-6 ml-4">
                       <div className="flex justify-between items-center mb-1">
@@ -200,7 +203,7 @@ export default function Home() {
                       </p>
                       <div className="mt-4 pt-4 border-t border-[#00ff41]/20 flex justify-end">
                         <button className="text-xs border border-[#00ff41] px-2 py-1 hover:bg-[#00ff41] hover:text-black transition-colors">
-                          EXECUTE
+                          ÇALIŞTIR
                         </button>
                       </div>
                     </div>
@@ -217,7 +220,7 @@ export default function Home() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <TerminalWindow title="INSTALLED_PACKAGES">
+                <TerminalWindow title="YÜKLÜ_PAKETLER">
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {cvData.skills.map((skill, index) => (
                       <div key={index} className="group relative border border-[#00ff41]/30 p-3 hover:bg-[#00ff41]/10 transition-colors pointer-events-auto">
@@ -229,7 +232,7 @@ export default function Home() {
                   </div>
                 </TerminalWindow>
 
-                <TerminalWindow title="ACHIEVEMENTS_LOG">
+                <TerminalWindow title="BAŞARILAR_KAYDI">
                   <ul className="space-y-3">
                     {cvData.achievements.map((achievement, index) => (
                       <li key={index} className="flex gap-2 items-start text-sm hover:text-white transition-colors cursor-default">
@@ -248,7 +251,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="fixed bottom-0 left-0 w-full text-center text-xs opacity-50 p-2 pointer-events-none z-40 bg-black/50">
-        SYSTEM_ID: YEA-001 | SECURE_CONNECTION_ESTABLISHED | {showCursor ? '_' : ' '}
+        SİSTEM_ID: YEA-001 | GÜVENLİ_BAĞLANTI_KURULDU | {showCursor ? '_' : ' '}
       </footer>
     </main>
   );

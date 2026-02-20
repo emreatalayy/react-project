@@ -8,17 +8,16 @@ interface BootSequenceProps {
 }
 
 const bootLines = [
-    "BIOS Date 01/01/24 12:00:00 Ver: 1.0.0",
+    "BIOS Tarih 01/01/26 12:00:00 Sürüm: 2.0.26",
     "CPU: Quantum Core i9-9900K @ 5.00GHz",
-    "Memory Test: 65536K OK",
-    "Detecting Primary Master ... YEA-CV-DRIVE",
-    "Detecting Primary Slave ... NONE",
-    "Loading Kernel...",
-    "Initializing AI Core...",
-    "Loading Modules: [XAI, LLM, RAG, NLP]",
-    "System Check: OK",
-    "ACCESS GRANTED",
-    "Welcome, User.",
+    "Bellek Testi: 65536K TAMAM",
+    "Birincil Sürücü Algılanıyor ... YEA-CV-DISK",
+    "Kernel Yükleniyor...",
+    "Yapay Zekâ Çekirdeği Başlatılıyor...",
+    "Modüller Yükleniyor: [XAI, LLM, RAG, NLP]",
+    "Sistem Kontrolü: TAMAM",
+    "ERİŞİM ONAYLANDI",
+    "Hoş Geldiniz, Kullanıcı.",
 ];
 
 export default function BootSequence({ onComplete }: BootSequenceProps) {
@@ -67,7 +66,7 @@ export default function BootSequence({ onComplete }: BootSequenceProps) {
             </div>
 
             <div className="absolute bottom-8 left-0 w-full text-center opacity-50 text-xs animate-pulse">
-                [CLICK TO SKIP OR WAIT FOR SYSTEM INIT]
+                [ATLAMAK İÇİN TIKLAYIN VEYA SİSTEM BAŞLATILMASINI BEKLEYİN]
             </div>
 
             {/* Scanline effect specifically for boot screen */}

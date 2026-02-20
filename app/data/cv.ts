@@ -1,7 +1,7 @@
 export const cvData = {
     personal: {
         name: "Yunus Emre Atalay",
-        title: "Computer Engineer | AI Specialist",
+        title: "Bilgisayar Mühendisi | Yapay Zekâ Uzmanı",
         email: "emreatalay852@gmail.com",
         phone: "(506) 056-3350",
         location: "İstanbul - Trabzon",
@@ -86,17 +86,20 @@ export const cvData = {
         },
     ],
     skills: [
-        "Python", "C/C++", "C#", "OpenCV", "Deep Learning", "Machine Learning",
-        "Data Visualization", "Data Analytics", "Multithreaded Programming",
-        "TensorFlow", "PyTorch", "Keras", "Sklearn", "Numpy", "Pandas", "Matplotlib",
-        "Large Language Models (LLM)", "RAG", "AI Agents", "n8n"
+        "Python", "C/C++", "C#", "JavaScript/TypeScript",
+        "React", "Next.js", "FastAPI", "Node.js",
+        "PyTorch", "TensorFlow", "Keras", "Sklearn",
+        "Doğal Dil İşleme (NLP)", "Derin Öğrenme", "Makine Öğrenmesi",
+        "Büyük Dil Modelleri (LLM)", "RAG", "Langchain", "Yapay Zekâ Ajanları",
+        "OpenCV", "Numpy", "Pandas",
+        "n8n", "Supabase", "Docker", "Git"
     ],
     achievements: [
-        "2025 Teknofest Türkçe Doğal Dil İşleme Yarışması - Takım Kaptanı - 3.’lük",
-        "2025 Teknofest Savaşan İHA - Finalist",
-        "2024 Vakıfbank Hack to the Future - En Yenilikçi Teknolojik Çözüm Ödülü",
-        "2024 Teknofest Sağlıkta Yapay Zekâ Yarışması - Takım Kaptanı - Finalist",
-        "2024 T3 AI Hackathon LLM Ağırlık Dosyaları ile Proje Yarışması - Takım Kaptanı - 3.’lük",
-        "2024 Teknofest Hava Savunma Sistemleri Yarışması - Yazılım Lideri - Finalist",
+        "2025 Teknofest Türkçe Doğal Dil İşleme Yarışması – 3.lük Derecesi",
+        "2025 Teknofest Savaşan İHA – Finalist",
+        "2024 Vakıfbank Hack to the Future Yarışması – En Yenilikçi Teknolojik Çözüm Ödülü",
+        "2024 Teknofest T3 AI Hackathon – 3.lük Derecesi",
+        "2024 Teknofest Sağlıkta Yapay Zekâ Yarışması – Takım Kaptanı – Finalist",
+        "2024 Teknofest Hava Savunma Sistemleri Yarışması – Yazılım Lideri – Finalist",
     ]
 };
