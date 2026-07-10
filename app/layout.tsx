@@ -1,24 +1,41 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Instrument_Serif, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const instrument = Instrument_Serif({
+  weight: "400",
+  style: ["normal", "italic"],
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-instrument",
+});
+
+const grotesk = Space_Grotesk({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-grotesk",
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-jetbrains",
+});
 
 export const metadata: Metadata = {
-  title: "Yunus Emre Atalay | Computer Engineer",
-  description: "Computer Engineer & AI Specialist Portfolio",
+  title: "Yunus Emre Atalay — Yapay Zekâ Mühendisi",
+  description:
+    "Yapay zekâ, LLM ve otonom ajan sistemleri üzerine çalışan Bilgisayar Mühendisi. Portfolyo, deneyim ve projeler.",
 };
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        {children}
-      </body>
+    <html
+      lang="tr"
+      className={`${instrument.variable} ${grotesk.variable} ${jetbrains.variable}`}
+    >
+      <body className="font-sans">{children}</body>
     </html>
   );
 }
