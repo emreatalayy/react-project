@@ -74,7 +74,7 @@ function splitKeepingSeparator(text: string, span: Span, separator: string): Spa
 // Packs consecutive pieces into chunks of at most `size`, carrying up to `overlap` characters of whole pieces forward.
 function mergeSpans(pieces: Span[], size: number, overlap: number): Span[] {
   const chunks: Span[] = [];
-  let current: Span[] = [];
+  const current: Span[] = [];
   let total = 0;
 
   for (const piece of pieces) {
