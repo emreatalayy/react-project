@@ -1,0 +1,317 @@
+{
+ "id": "401915435",
+ "kickoff": "2026-10-13T19:00Z",
+ "competition": "2026-27 UEFA Champions League, League Phase",
+ "venue": "RAMS Park",
+ "attendance": 49623,
+ "teams": {
+  "home": {
+   "name": "Galatasaray",
+   "short": "GS",
+   "color": "#d95926",
+   "formation": "4-2-3-1"
+  },
+  "away": {
+   "name": "Barcelona",
+   "short": "FCB",
+   "color": "#3987e5",
+   "formation": "4-3-3"
+  }
+ },
+ "firstHalfAdded": 4,
+ "end": 97,
+ "market": {
+  "p": [
+   0.1186,
+   0.1582,
+   0.7232
+  ],
+  "rates": {
+   "home": 0.985,
+   "away": 2.62
+  }
+ },
+ "shots": [
+  {
+   "el": 12,
+   "minute": 12,
+   "extra": 0,
+   "team": "away",
+   "player": "Lamine Yamal",
+   "short": "Yamal",
+   "xg": 0.0271,
+   "outcome": "missed"
+  },
+  {
+   "el": 16,
+   "minute": 16,
+   "extra": 0,
+   "team": "away",
+   "player": "Anthony Gordon",
+   "short": "Gordon",
+   "xg": 0.1511,
+   "outcome": "saved"
+  },
+  {
+   "el": 18,
+   "minute": 18,
+   "extra": 0,
+   "team": "away",
+   "player": "Fermín López",
+   "short": "Fermín",
+   "xg": 0.0271,
+   "outcome": "missed"
+  },
+  {
+   "el": 24,
+   "minute": 24,
+   "extra": 0,
+   "team": "away",
+   "player": "Dani Olmo",
+   "short": "Olmo",
+   "xg": 0.0854,
+   "outcome": "missed"
+  },
+  {
+   "el": 25,
+   "minute": 25,
+   "extra": 0,
+   "team": "away",
+   "player": "João Cancelo",
+   "short": "Cancelo",
+   "xg": 0.0271,
+   "outcome": "saved"
+  },
+  {
+   "el": 25,
+   "minute": 25,
+   "extra": 0,
+   "team": "away",
+   "player": "Lamine Yamal",
+   "short": "Yamal",
+   "xg": 0.0711,
+   "outcome": "blocked"
+  },
+  {
+   "el": 28,
+   "minute": 28,
+   "extra": 0,
+   "team": "home",
+   "player": "Aleksey Batrakov",
+   "short": "Batrakov",
+   "xg": 0.201,
+   "outcome": "goal"
+  },
+  {
+   "el": 34,
+   "minute": 34,
+   "extra": 0,
+   "team": "home",
+   "player": "Victor Osimhen",
+   "short": "Osimhen",
+   "xg": 0.0854,
+   "outcome": "blocked"
+  },
+  {
+   "el": 37,
+   "minute": 37,
+   "extra": 0,
+   "team": "home",
+   "player": "Yunus Akgün",
+   "short": "Akgün",
+   "xg": 0.1787,
+   "outcome": "saved"
+  },
+  {
+   "el": 43,
+   "minute": 43,
+   "extra": 0,
+   "team": "away",
+   "player": "João Cancelo",
+   "short": "Cancelo",
+   "xg": 0.0572,
+   "outcome": "goal"
+  },
+  {
+   "el": 45,
+   "minute": 45,
+   "extra": 0,
+   "team": "away",
+   "player": "Anthony Gordon",
+   "short": "Gordon",
+   "xg": 0.0271,
+   "outcome": "saved"
+  },
+  {
+   "el": 46,
+   "minute": 45,
+   "extra": 1,
+   "team": "away",
+   "player": "Anthony Gordon",
+   "short": "Gordon",
+   "xg": 0.0572,
+   "outcome": "saved"
+  },
+  {
+   "el": 47,
+   "minute": 45,
+   "extra": 2,
+   "team": "away",
+   "player": "Dani Olmo",
+   "short": "Olmo",
+   "xg": 0.0271,
+   "outcome": "saved"
+  },
+  {
+   "el": 51,
+   "minute": 47,
+   "extra": 0,
+   "team": "away",
+   "player": "Anthony Gordon",
+   "short": "Gordon",
+   "xg": 0.2253,
+   "outcome": "missed"
+  },
+  {
+   "el": 54,
+   "minute": 50,
+   "extra": 0,
+   "team": "away",
+   "player": "Fermín López",
+   "short": "Fermín",
+   "xg": 0.0542,
+   "outcome": "goal"
+  },
+  {
+   "el": 56,
+   "minute": 52,
+   "extra": 0,
+   "team": "away",
+   "player": "Lamine Yamal",
+   "short": "Yamal",
+   "xg": 0.0572,
+   "outcome": "missed"
+  },
+  {
+   "el": 57,
+   "minute": 53,
+   "extra": 0,
+   "team": "away",
+   "player": "Anthony Gordon",
+   "short": "Gordon",
+   "xg": 0.2253,
+   "outcome": "goal"
+  },
+  {
+   "el": 63,
+   "minute": 59,
+   "extra": 0,
+   "team": "home",
+   "player": "Gabriel Sara",
+   "short": "Sara",
+   "xg": 0.0118,
+   "outcome": "missed"
+  },
+  {
+   "el": 66,
+   "minute": 62,
+   "extra": 0,
+   "team": "away",
+   "player": "Karim Adeyemi",
+   "short": "Adeyemi",
+   "xg": 0.1511,
+   "outcome": "blocked"
+  },
+  {
+   "el": 67,
+   "minute": 63,
+   "extra": 0,
+   "team": "away",
+   "player": "Lamine Yamal",
+   "short": "Yamal",
+   "xg": 0.0271,
+   "outcome": "blocked"
+  },
+  {
+   "el": 69,
+   "minute": 65,
+   "extra": 0,
+   "team": "away",
+   "player": "Karim Adeyemi",
+   "short": "Adeyemi",
+   "xg": 0.0711,
+   "outcome": "goal"
+  },
+  {
+   "el": 73,
+   "minute": 69,
+   "extra": 0,
+   "team": "away",
+   "player": "Lamine Yamal",
+   "short": "Yamal",
+   "xg": 0.1835,
+   "outcome": "missed"
+  },
+  {
+   "el": 78,
+   "minute": 74,
+   "extra": 0,
+   "team": "home",
+   "player": "Lesley Ugochukwu",
+   "short": "Ugochukwu",
+   "xg": 0.0271,
+   "outcome": "saved"
+  },
+  {
+   "el": 80,
+   "minute": 76,
+   "extra": 0,
+   "team": "away",
+   "player": "Karim Adeyemi",
+   "short": "Adeyemi",
+   "xg": 0.0572,
+   "outcome": "missed"
+  },
+  {
+   "el": 87,
+   "minute": 83,
+   "extra": 0,
+   "team": "away",
+   "player": "Gabriel Jesus",
+   "short": "Gabriel Jesus",
+   "xg": 0.1511,
+   "outcome": "saved"
+  },
+  {
+   "el": 88,
+   "minute": 84,
+   "extra": 0,
+   "team": "away",
+   "player": "Rodri",
+   "short": "Rodri",
+   "xg": 0.1511,
+   "outcome": "blocked"
+  },
+  {
+   "el": 89,
+   "minute": 85,
+   "extra": 0,
+   "team": "away",
+   "player": "Karim Adeyemi",
+   "short": "Adeyemi",
+   "xg": 0.1835,
+   "outcome": "blocked"
+  }
+ ],
+ "disallowed": [
+  {
+   "el": 34,
+   "minute": 34,
+   "team": "home",
+   "player": "Barış Alper Yılmaz"
+  }
+ ],
+ "model": {
+  "nShots": 7057
+ }
+}

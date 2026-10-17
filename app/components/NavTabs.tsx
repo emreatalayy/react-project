@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 const tabs = [
   { href: '/', label: 'Hakkımda', isActive: (path: string) => path === '/' },
   { href: '/araclar', label: 'Araçlar', isActive: (path: string) => path.startsWith('/araclar') },
+  { href: '/analiz', label: 'Analiz', isActive: (path: string) => path.startsWith('/analiz') },
 ];
 
 export function NavTabs() {
@@ -13,12 +14,12 @@ export function NavTabs() {
   const activeIndex = tabs.findIndex((tab) => tab.isActive(pathname));
 
   return (
-    <div className="relative grid grid-cols-2">
+    <div className="relative grid" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
       {activeIndex >= 0 && (
         <span
           aria-hidden="true"
-          className="absolute inset-y-0 left-0 w-1/2 rounded-full bg-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-          style={{ transform: `translateX(${activeIndex * 100}%)` }}
+          className="absolute inset-y-0 left-0 rounded-full bg-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{ width: `${100 / tabs.length}%`, transform: `translateX(${activeIndex * 100}%)` }}
         />
       )}
       {tabs.map((tab, index) => (

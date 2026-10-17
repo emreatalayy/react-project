@@ -1,0 +1,141 @@
+{
+ "n_shots": 7057,
+ "n_goals": 688,
+ "n_matches": 291,
+ "zone_model": {
+  "auc": 0.7593403002187193,
+  "brier": 0.0791983376932286,
+  "logloss": 0.27770926347980057
+ },
+ "statsbomb_xg": {
+  "auc": 0.8061496319381306,
+  "brier": 0.07279445263555848,
+  "logloss": 0.25718175686609807
+ },
+ "constant": {
+  "brier": 0.08798719084334611,
+  "logloss": 0.3195367970978447
+ },
+ "corr_with_sb_xg": 0.6731640159552432,
+ "coef": {
+  "z_six_central": 1.851,
+  "z_six_side": 0.863,
+  "z_box_centre": 0.372,
+  "z_box_side": -0.705,
+  "z_difficult_angle": -0.967,
+  "z_outside_box": -1.482,
+  "z_long_range": -1.149,
+  "header": -0.846,
+  "assisted": -0.233,
+  "cross": 0.201,
+  "through": 1.472,
+  "fast_break": 0.346,
+  "corner": -0.288,
+  "free_kick_direct": 0.188,
+  "header_in_six": 0.225
+ },
+ "intercept": -1.8650452364548222,
+ "calibration": [
+  {
+   "pred": 0.0239,
+   "actual": 0.0311,
+   "n": 868
+  },
+  {
+   "pred": 0.0286,
+   "actual": 0.0204,
+   "n": 685
+  },
+  {
+   "pred": 0.0302,
+   "actual": 0.0366,
+   "n": 574
+  },
+  {
+   "pred": 0.0392,
+   "actual": 0.0355,
+   "n": 705
+  },
+  {
+   "pred": 0.0547,
+   "actual": 0.0518,
+   "n": 830
+  },
+  {
+   "pred": 0.0661,
+   "actual": 0.0358,
+   "n": 586
+  },
+  {
+   "pred": 0.0876,
+   "actual": 0.0983,
+   "n": 692
+  },
+  {
+   "pred": 0.1502,
+   "actual": 0.1694,
+   "n": 744
+  },
+  {
+   "pred": 0.1827,
+   "actual": 0.1828,
+   "n": 711
+  },
+  {
+   "pred": 0.3266,
+   "actual": 0.3218,
+   "n": 662
+  }
+ ],
+ "zones": [
+  {
+   "zone": "six_central",
+   "shots": 217,
+   "goals": 85,
+   "conv": 0.3917,
+   "sb_xg": 0.4114
+  },
+  {
+   "zone": "six_side",
+   "shots": 323,
+   "goals": 66,
+   "conv": 0.2043,
+   "sb_xg": 0.1737
+  },
+  {
+   "zone": "box_centre",
+   "shots": 2437,
+   "goals": 361,
+   "conv": 0.1481,
+   "sb_xg": 0.1413
+  },
+  {
+   "zone": "box_side",
+   "shots": 1171,
+   "goals": 86,
+   "conv": 0.0734,
+   "sb_xg": 0.068
+  },
+  {
+   "zone": "difficult_angle",
+   "shots": 162,
+   "goals": 8,
+   "conv": 0.0494,
+   "sb_xg": 0.0596
+  },
+  {
+   "zone": "outside_box",
+   "shots": 2632,
+   "goals": 78,
+   "conv": 0.0296,
+   "sb_xg": 0.0367
+  },
+  {
+   "zone": "long_range",
+   "shots": 115,
+   "goals": 4,
+   "conv": 0.0348,
+   "sb_xg": 0.0069
+  }
+ ]
+}
