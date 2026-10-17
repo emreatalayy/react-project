@@ -6,7 +6,7 @@ import { TokenCounter } from './TokenCounter';
 export const metadata: Metadata = {
   title: 'Token Sayacı',
   description:
-    "Metnin OpenAI tokenizer'larıyla kaç token tuttuğunu, token sınırlarını ve tahmini API maliyetini tarayıcında gör.",
+    "Metnin güncel OpenAI modellerinde kaç token tuttuğunu, bağlam penceresi doluluğunu ve tahmini API maliyetini tarayıcında gör.",
 };
 
 export default function TokenCounterPage() {
@@ -32,7 +32,7 @@ export default function TokenCounterPage() {
             Token Sayacı
           </h1>
           <p className="mt-3 leading-relaxed text-white/75">
-            Metninin OpenAI tokenizer&apos;larıyla kaç token tuttuğunu, token&apos;ların nereden bölündüğünü ve tahmini
+            Metninin güncel OpenAI modellerinde kaç token tuttuğunu, bağlam penceresine sığıp sığmadığını ve tahmini
             API maliyetini gör.
           </p>
         </div>

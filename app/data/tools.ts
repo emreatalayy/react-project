@@ -23,8 +23,8 @@ export const tools: Tool[] = [
     {
         slug: "token-sayaci",
         name: "Token Sayacı",
-        description: "Metnin OpenAI tokenizer'larıyla kaç token tuttuğunu, token sınırlarını ve tahmini API maliyetini gör.",
-        tags: ["Tokenizer", "Maliyet", "Tarayıcıda çalışır"],
+        description: "Metnin güncel OpenAI modellerinde kaç token tuttuğunu, bağlam penceresini ve tahmini API maliyetini gör.",
+        tags: ["OpenAI", "Maliyet", "Tarayıcıda çalışır"],
         icon: Coins,
     },
 ];
