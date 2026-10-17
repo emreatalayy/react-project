@@ -1,91 +1,145 @@
 @import "tailwindcss";
 
-@theme {
-  --color-base: #f6f7f9;
-  --color-surface: #ffffff;
-  --color-fg: #16181d;
-  --color-muted: #646b78;
-  --color-line: #e3e5ea;
-  --color-accent: #ea580c;
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
-@theme inline {
-  --font-sans: var(--font-grotesk);
-  --font-serif: var(--font-instrument);
-  --font-mono: var(--font-jetbrains);
+/* Base colour of the wallpaper, also shown on overscroll */
+html {
+  background: #0a1a3f;
+  color-scheme: dark;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 body {
-  background: var(--color-base);
-  color: var(--color-fg);
+  color: #fafafa;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-}
-
-/* Subtle film grain */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.028;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: var(--color-accent);
-  color: var(--color-base);
+  background: rgba(56, 189, 248, 0.45);
+  color: #fff;
 }
 
-::-webkit-scrollbar {
-  width: 10px;
-  background: var(--color-base);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-line);
-  border-radius: 99px;
-  border: 2px solid var(--color-base);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-muted);
+:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 3px;
 }
 
-/* Animated underline for links */
-.link-underline {
+/* Ocean wallpaper: electric blue and cyan light at the top, teal and deep navy below.
+   Kept deep enough that white text and the frosted cards stay legible on top of it. */
+.wallpaper {
+  background-color: #0a1a3f;
+  background-image:
+    radial-gradient(36% 28% at 50% 0%, rgba(255, 255, 255, 0.14), transparent 70%),
+    radial-gradient(62% 52% at 8% 2%, rgba(37, 99, 235, 0.85), transparent 62%),
+    radial-gradient(52% 46% at 94% 4%, rgba(6, 182, 212, 0.6), transparent 62%),
+    radial-gradient(34% 30% at 58% 16%, rgba(45, 212, 191, 0.28), transparent 65%),
+    radial-gradient(58% 52% at 4% 96%, rgba(14, 165, 233, 0.4), transparent 62%),
+    radial-gradient(60% 56% at 96% 92%, rgba(29, 78, 216, 0.5), transparent 62%),
+    linear-gradient(180deg, #102a6b 0%, #0b1c48 55%, #081733 100%);
+}
+
+/* Bento cards: cursor-following glow and a lit border */
+.spotlight {
   position: relative;
+  isolation: isolate;
 }
-.link-underline::after {
+.spotlight::before,
+.spotlight::after {
   content: "";
   position: absolute;
-  left: 0;
-  bottom: -3px;
-  height: 1px;
-  width: 100%;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
-.link-underline:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
+.spotlight::before {
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(480px circle at var(--x, 50%) var(--y, 50%), rgba(125, 211, 252, 0.12), transparent 45%);
+}
+.spotlight::after {
+  inset: -1px;
+  padding: 1px;
+  background: radial-gradient(320px circle at var(--x, 50%) var(--y, 50%), rgba(186, 230, 253, 0.7), transparent 45%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+.spotlight-group:hover .spotlight::before,
+.spotlight-group:hover .spotlight::after {
+  opacity: 1;
 }
 
-/* Skills marquee */
+/* Shows only the padding ring of an element (used for the rotating border light) */
+.border-ring {
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.mask-fade-x {
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+
+.marquee-pause:hover .marquee {
+  animation-play-state: paused;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.animate-marquee {
-  animation: marquee 40s linear infinite;
+  to {
+    transform: translateX(-50%);
+  }
 }
 
-/* Status pulse */
-@keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.35); }
-  60% { box-shadow: 0 0 0 8px rgba(234, 88, 12, 0); }
+@keyframes blink {
+  50% {
+    opacity: 0.2;
+  }
 }
-.pulse-dot {
-  animation: pulse-dot 2.2s ease-out infinite;
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade-up {
+    animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .marquee {
+    animation: marquee 50s linear infinite;
+  }
+  .marquee-reverse {
+    animation-direction: reverse;
+  }
+  .blink {
+    animation: blink 2s ease-in-out infinite;
+  }
+  .dash-flow {
+    animation: dash-flow 1.4s linear infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flight-dot {
+    display: none;
+  }
 }

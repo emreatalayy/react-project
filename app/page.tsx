@@ -1,469 +1,276 @@
-'use client';
-
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
-import Lenis from 'lenis';
+import Link from 'next/link';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Briefcase,
+  GraduationCap,
+  Layers,
+  Mail,
+  MapPin,
+  Sparkles,
+  UserRound,
+  Wrench,
+} from 'lucide-react';
+import { GitHubIcon, LinkedInIcon } from './components/BrandIcons';
+import { Card, CardLabel, cardClass, glassShadow } from './components/Card';
+import { CopyEmailButton } from './components/CopyEmailButton';
+import { LocalClock } from './components/LocalClock';
+import { RouteArc } from './components/RouteArc';
+import { SpotlightGrid } from './components/SpotlightGrid';
+import { ToolStack } from './components/ToolStack';
 import { cvData } from './data/cv';
+import { tools } from './data/tools';
 
-const EASE = [0.22, 1, 0.36, 1] as const;
+const iconButton =
+  'grid size-11 place-items-center rounded-full border border-white/10 bg-white/[0.03] text-zinc-300 transition-colors hover:border-white/20 hover:bg-white/[0.08] hover:text-white';
 
-function Reveal({
-  children,
-  delay = 0,
-  className,
-}: {
-  children: ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 36, filter: 'blur(8px)' }}
-      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-      viewport={{ once: false, margin: '-60px' }}
-      transition={{ duration: 0.9, delay, ease: EASE }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
+const linkCard = 'group flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1';
+
+// Brand colors that would vanish on the dark background fall back to light gray.
+function readableBrandColor(hex: string) {
+  const channel = (offset: number) => {
+    const value = parseInt(hex.slice(offset, offset + 2), 16) / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  };
+  const luminance = 0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+  return luminance < 0.1 ? '#d4d4d8' : `#${hex}`;
 }
-
-function SectionLabel({ index, title }: { index: string; title: string }) {
-  return (
-    <div className="flex items-baseline gap-4 font-mono text-xs tracking-[0.25em] uppercase text-muted">
-      <span className="text-accent">{index}</span>
-      <span>{title}</span>
-      <span className="hidden sm:block flex-1 border-t border-line self-center" />
-    </div>
-  );
-}
-
-const projectAwards: (string | null)[] = [
-  'Global-CENG · 1.lik',
-  'En Yenilikçi Çözüm Ödülü',
-  'Teknofest · 3.lük',
-  null,
-];
-
-const navLinks = [
-  { href: '#hakkimda', label: 'Hakkımda' },
-  { href: '#deneyim', label: 'Deneyim' },
-  { href: '#projeler', label: 'Projeler' },
-  { href: '#iletisim', label: 'İletişim' },
-];
 
 export default function Home() {
-  const [time, setTime] = useState('');
-  const heroRef = useRef<HTMLElement>(null);
-
-  // Smooth scroll
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.15,
-      anchors: { offset: -80 },
-    });
-    let raf = requestAnimationFrame(function loop(t) {
-      lenis.raf(t);
-      raf = requestAnimationFrame(loop);
-    });
-    return () => {
-      cancelAnimationFrame(raf);
-      lenis.destroy();
-    };
-  }, []);
-
-  useEffect(() => {
-    const tick = () =>
-      setTime(
-        new Date().toLocaleTimeString('tr-TR', {
-          hour: '2-digit',
-          minute: '2-digit',
-        })
-      );
-    tick();
-    const interval = setInterval(tick, 30_000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Scroll progress bar
-  const { scrollYProgress } = useScroll();
-  const progressX = useSpring(scrollYProgress, {
-    stiffness: 140,
-    damping: 30,
-    mass: 0.4,
-  });
-
-  // Hero parallax
-  const { scrollYProgress: heroProgress } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start'],
-  });
-  const heroY = useTransform(heroProgress, [0, 1], [0, 140]);
-  const heroOpacity = useTransform(heroProgress, [0, 0.85], [1, 0]);
-
-  const marqueeSkills = [...cvData.skills, ...cvData.skills];
+  const { current, location, education, social } = cvData;
 
   return (
-    <main className="relative">
-      {/* Scroll progress */}
-      <motion.div
-        style={{ scaleX: progressX }}
-        className="fixed top-0 left-0 right-0 h-[2px] bg-accent origin-left z-[60]"
-      />
+    <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12">
+      <SpotlightGrid className="grid grid-flow-dense grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        {/* Profil */}
+        <Card className="col-span-2 flex flex-col overflow-hidden sm:p-8 lg:row-span-2">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-24 -top-28 size-80 rounded-full bg-blue-500/25 blur-3xl"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-36 -left-20 size-72 rounded-full bg-cyan-500/10 blur-3xl"
+          />
 
-      {/* ─── Nav ─── */}
-      <header className="fixed top-0 left-0 w-full z-50 bg-base/70 backdrop-blur-md border-b border-line">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <a href="#top" className="font-serif text-xl tracking-tight">
-            Emre <span className="italic text-accent">Atalay</span>
-          </a>
-          <nav className="hidden md:flex items-center gap-8 font-mono text-[11px] tracking-[0.2em] uppercase text-muted">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="link-underline hover:text-fg transition-colors duration-300"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-          <div className="font-mono text-[11px] tracking-[0.2em] text-muted uppercase">
-            İstanbul {time && <span className="text-fg">— {time}</span>}
+          <div className="relative">
+            <CardLabel icon={UserRound}>Hakkımda</CardLabel>
+            <h1 className="mt-6 bg-linear-to-br from-white via-white to-zinc-400 bg-clip-text text-[1.85rem] font-semibold leading-tight tracking-tight text-transparent sm:mt-10 sm:text-5xl">
+              {cvData.name}
+            </h1>
+            <p className="mt-1 w-fit bg-linear-to-r from-sky-300 via-cyan-300 to-teal-200 bg-clip-text text-base font-medium text-transparent sm:mt-2 sm:text-lg">
+              {cvData.title}
+            </p>
           </div>
-        </div>
-      </header>
+          <p className="relative mt-4 max-w-md text-[14.5px] leading-relaxed text-zinc-400 sm:mt-5 sm:text-[15px]">
+            {cvData.bio}
+          </p>
 
-      {/* ─── Hero ─── */}
-      <section
-        id="top"
-        ref={heroRef}
-        className="relative min-h-screen flex flex-col justify-end pt-32 overflow-hidden"
-      >
-        {/* Ambient glow */}
-        <div className="absolute -top-48 right-[-10%] w-[640px] h-[640px] rounded-full bg-accent/10 blur-[160px] pointer-events-none" />
-        <div className="absolute bottom-0 left-[-15%] w-[480px] h-[480px] rounded-full bg-accent/5 blur-[140px] pointer-events-none" />
-
-        <motion.div
-          style={{ y: heroY, opacity: heroOpacity }}
-          className="flex-1 flex flex-col justify-center py-16 max-w-6xl mx-auto px-6 w-full"
-        >
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: EASE }}
-            className="font-mono text-xs tracking-[0.3em] uppercase text-muted mb-8"
-          >
-            Yapay Zekâ Mühendisi · İstanbul — Trabzon
-          </motion.p>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 32 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.1, ease: EASE }}
-            className="font-serif text-[clamp(3.2rem,10vw,8.5rem)] leading-[1.02] tracking-tight max-w-5xl"
-          >
-            Yunus Emre <em className="italic text-accent">Atalay</em>
-          </motion.h1>
-
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.25, ease: EASE }}
-            className="mt-10 flex flex-wrap items-center gap-3"
-          >
-            {[
-              'Doğal Dil İşleme',
-              'Görüntü İşleme',
-              'Açıklanabilir YZ (XAI)',
-              'Büyük Dil Modelleri',
-            ].map((tag) => (
-              <span
-                key={tag}
-                className="font-mono text-[11px] tracking-[0.15em] uppercase text-muted border border-line rounded-full px-4 py-2 bg-surface/70"
-              >
-                {tag}
-              </span>
-            ))}
-            <div className="flex items-center gap-3 border border-line rounded-full px-5 py-2.5 bg-surface">
-              <span className="pulse-dot w-2 h-2 rounded-full bg-accent" />
-              <span className="font-mono text-[11px] tracking-[0.15em] uppercase">
-                Zephlex — Yapay Zekâ Mühendisi
-              </span>
-            </div>
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.4 }}
-          className="border-t border-line max-w-6xl mx-auto px-6 w-full pb-2 pt-4 flex justify-between font-mono text-[10px] tracking-[0.25em] uppercase text-muted"
-        >
-          <span>Portfolyo — 2026</span>
-          <span>Aşağı kaydırın ↓</span>
-        </motion.div>
-      </section>
-
-      {/* ─── Skills marquee ─── */}
-      <section className="border-y border-line bg-surface/40 overflow-hidden py-5 select-none">
-        <div className="flex whitespace-nowrap animate-marquee w-max">
-          {marqueeSkills.map((skill, i) => (
-            <span
-              key={i}
-              className="mx-6 font-mono text-sm tracking-wider text-muted flex items-center gap-12"
+          <div className="relative mt-6 flex flex-wrap items-center gap-2 sm:mt-8 lg:mt-auto lg:pt-8">
+            <a
+              href={`mailto:${cvData.email}`}
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-medium text-zinc-950 shadow-[0_0_36px_-8px_rgba(56,189,248,0.75)] transition-transform duration-300 hover:-translate-y-0.5"
             >
-              {skill} <span className="text-accent">✦</span>
+              <Mail aria-hidden="true" className="size-4" />
+              <span className="sm:hidden">E-posta gönder</span>
+              <span className="hidden sm:inline">{cvData.email}</span>
+            </a>
+            <CopyEmailButton email={cvData.email} className={iconButton} />
+          </div>
+        </Card>
+
+        {/* Şu an */}
+        <Card className="col-span-2 flex flex-col md:col-span-1" delay={60}>
+          <div className="flex items-start justify-between">
+            <CardLabel icon={Briefcase}>Şu an</CardLabel>
+            <span className="relative mt-1 flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />
+              <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
             </span>
-          ))}
-        </div>
-      </section>
-
-      {/* ─── Hakkımda ─── */}
-      <section id="hakkimda" className="scroll-mt-24 max-w-6xl mx-auto px-6 py-28 md:py-36">
-        <Reveal>
-          <SectionLabel index="01" title="Hakkımda" />
-        </Reveal>
-
-        <div className="mt-14 grid md:grid-cols-12 gap-12">
-          <Reveal className="md:col-span-7">
-            <p className="font-serif text-3xl md:text-4xl leading-snug tracking-tight">
-              Karadeniz Teknik Üniversitesi Bilgisayar Mühendisliği mezunuyum;
-              doğal dil işleme, görüntü işleme,{' '}
-              <em className="italic text-accent">
-                açıklanabilir yapay zekâ ve büyük dil modelleri
-              </em>{' '}
-              üzerine çalışmalar yapıyorum.
+          </div>
+          <div className="mt-5 sm:mt-8 lg:mt-auto">
+            <p className="text-lg font-medium leading-snug text-zinc-100">{current.company}</p>
+            <p className="mt-1 text-sm text-zinc-400">{current.role}</p>
+            <p className="mt-3 inline-flex rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-300">
+              {current.since}
             </p>
-            <p className="mt-8 text-muted leading-relaxed max-w-xl">
-              Aktif olarak aynı üniversitede yüksek lisans eğitimime devam ediyorum.
-              Akademik hayatım boyunca çeşitli yapay zekâ projelerinde ve
-              yarışmalarında aktif roller üstlendim.
-            </p>
-            <p className="mt-4 text-muted leading-relaxed max-w-xl">
-              Bitirme projemle, Turkcell Global Bilgi ve KTÜ ortaklığında düzenlenen
-              chatbot yarışmasında birincilik ödülü kazandım. Teknofest ve kurumsal
-              hackathonlarda derece ve finalistliklerim bulunuyor.
-            </p>
-          </Reveal>
+          </div>
+        </Card>
 
-          <Reveal delay={0.15} className="md:col-span-5">
-            <dl className="border-t border-line">
-              {[
-                { value: `${cvData.experience.length}`, label: 'Profesyonel deneyim' },
-                { value: `${cvData.projects.length}+`, label: 'Öne çıkan proje' },
-                { value: `${cvData.achievements.length}`, label: 'Ödül & finalistlik' },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="flex items-baseline justify-between py-6 border-b border-line"
-                >
-                  <dt className="font-mono text-xs tracking-[0.2em] uppercase text-muted">
-                    {stat.label}
-                  </dt>
-                  <dd className="font-serif text-5xl">{stat.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </Reveal>
-        </div>
-      </section>
+        {/* GitHub */}
+        <a
+          href={social.github.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${cardClass()} ${linkCard}`}
+          style={{ animationDelay: '120ms' }}
+        >
+          <div className="flex items-start justify-between">
+            <span className="grid size-11 place-items-center rounded-2xl bg-white text-zinc-950 shadow-[0_8px_24px_-8px_rgba(255,255,255,0.45)]">
+              <GitHubIcon className="size-6" />
+            </span>
+            <ArrowUpRight
+              aria-hidden="true"
+              className="size-5 text-zinc-500 transition duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white"
+            />
+          </div>
+          <div className="mt-5 sm:mt-8">
+            <p className="font-medium text-zinc-100">GitHub</p>
+            <p className="mt-0.5 truncate text-sm text-zinc-400">{social.github.handle}</p>
+            <p className="mt-3 text-xs leading-relaxed text-zinc-400">Kodlarım ve projelerim</p>
+          </div>
+        </a>
 
-      {/* ─── Deneyim ─── */}
-      <section id="deneyim" className="scroll-mt-24 max-w-6xl mx-auto px-6 pb-28 md:pb-36">
-        <Reveal>
-          <SectionLabel index="02" title="Deneyim" />
-        </Reveal>
+        {/* Konum */}
+        <Card className="col-span-2 flex flex-col gap-3 overflow-hidden sm:flex-row sm:gap-6" delay={180}>
+          <div className="flex shrink-0 flex-col">
+            <CardLabel icon={MapPin}>Konum</CardLabel>
+            <div className="mt-4 sm:mt-auto">
+              <LocalClock timeZone={location.timeZone} city={location.city} />
+            </div>
+          </div>
+          <RouteArc className="w-full max-w-[19rem] self-center sm:ml-auto sm:self-end" />
+        </Card>
 
-        <div className="mt-14">
-          {cvData.experience.map((exp, i) => (
-            <Reveal key={i} delay={i * 0.05}>
-              <div className="group grid md:grid-cols-12 gap-2 md:gap-8 py-8 border-t border-line transition-colors duration-300 hover:bg-surface/60 md:px-4 md:-mx-4 rounded-lg">
-                <div className="md:col-span-3 font-mono text-xs tracking-wider text-muted pt-1.5">
-                  {exp.date}
-                </div>
-                <div className="md:col-span-9">
-                  <h3 className="font-serif text-2xl md:text-3xl tracking-tight group-hover:text-accent transition-colors duration-300">
-                    {exp.role}
-                  </h3>
-                  <p className="mt-1 font-mono text-xs tracking-[0.15em] uppercase text-muted">
-                    {exp.company}
-                    {exp.location ? ` · ${exp.location}` : ''}
-                  </p>
-                  <p className="mt-4 text-muted leading-relaxed max-w-2xl">
-                    {exp.description}
-                  </p>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-          <div className="border-t border-line" />
-        </div>
+        {/* Odak alanları */}
+        <Card className="col-span-2 flex flex-col" delay={240}>
+          <CardLabel icon={Sparkles}>Odak alanları</CardLabel>
+          <ul className="mt-5 flex flex-wrap gap-2">
+            {cvData.focus.map(({ label, icon: Icon }) => (
+              <li
+                key={label}
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] py-1.5 pl-2.5 pr-3.5 text-sm text-zinc-200 transition-colors hover:border-sky-400/40 hover:bg-sky-400/10"
+              >
+                <Icon aria-hidden="true" className="size-4 text-sky-300" />
+                {label}
+              </li>
+            ))}
+          </ul>
+        </Card>
 
         {/* Eğitim */}
-        <Reveal className="mt-20">
-          <p className="font-mono text-xs tracking-[0.25em] uppercase text-muted mb-8">
-            Eğitim
-          </p>
-          <div className="grid md:grid-cols-2 gap-6">
-            {cvData.education.map((edu, i) => (
+        <Card className="col-span-2 md:col-span-1" delay={300}>
+          <CardLabel icon={GraduationCap}>Eğitim</CardLabel>
+          <p className="mt-5 font-medium leading-snug text-zinc-100">{education.school}</p>
+          <p className="mt-1 text-sm text-zinc-400">{education.department}</p>
+          <ol className="mt-5 space-y-3 border-l border-white/10 pl-4">
+            {education.degrees.map((degree, index) => (
+              <li key={degree.level} className="relative">
+                <span
+                  aria-hidden="true"
+                  className={`absolute -left-[21px] top-[5px] size-[9px] rounded-full border ${
+                    index === 0
+                      ? 'border-sky-300 bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.8)]'
+                      : 'border-white/30 bg-[#0f1f40]'
+                  }`}
+                />
+                <p className="text-sm leading-5 text-zinc-200">{degree.level}</p>
+                <p className="text-xs text-zinc-400">{degree.status}</p>
+              </li>
+            ))}
+          </ol>
+        </Card>
+
+        {/* LinkedIn */}
+        <a
+          href={social.linkedin.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${cardClass('linkedin')} ${linkCard}`}
+          style={{ animationDelay: '340ms' }}
+        >
+          <div className="flex items-start justify-between">
+            <span className="grid size-11 place-items-center rounded-2xl bg-[#0a66c2] text-white shadow-[0_8px_24px_-8px_rgba(10,102,194,0.9)]">
+              <LinkedInIcon className="size-5" />
+            </span>
+            <ArrowUpRight
+              aria-hidden="true"
+              className="size-5 text-sky-200/60 transition duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white"
+            />
+          </div>
+          <div className="mt-5 sm:mt-8">
+            <p className="font-medium text-zinc-100">LinkedIn</p>
+            <p className="mt-0.5 truncate text-sm text-sky-100/70">{social.linkedin.handle}</p>
+            <p className="mt-3 text-xs leading-relaxed text-sky-100/70">Deneyimlerim ve bağlantılarım</p>
+          </div>
+        </a>
+
+        {/* Teknolojiler */}
+        <Card className="marquee-pause col-span-2 flex flex-col overflow-hidden" delay={380}>
+          <CardLabel icon={Layers}>Teknolojiler</CardLabel>
+          <div className="mask-fade-x -mx-5 mt-5 space-y-2.5 sm:-mx-6 lg:mt-auto lg:pt-5">
+            {cvData.stack.map((row, rowIndex) => (
               <div
-                key={i}
-                className="border border-line bg-surface/40 rounded-2xl p-8 hover:border-accent/50 hover:-translate-y-1 transition-all duration-300"
+                key={rowIndex}
+                className={`marquee flex w-max gap-2.5 pr-2.5 ${rowIndex % 2 === 1 ? 'marquee-reverse' : ''}`}
               >
-                <div className="flex justify-between items-start gap-4 mb-4">
-                  <h3 className="font-serif text-xl tracking-tight">{edu.school}</h3>
-                  <span className="font-mono text-[10px] tracking-widest text-muted whitespace-nowrap pt-1.5">
-                    {edu.date}
-                  </span>
-                </div>
-                <p className="text-sm">{edu.degree}</p>
-                <p className="mt-2 font-mono text-xs text-muted">
-                  GPA {edu.gpa} · {edu.location}
-                </p>
-                {edu.details && (
-                  <p className="mt-4 text-sm text-muted leading-relaxed">{edu.details}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ─── Projeler ─── */}
-      <section id="projeler" className="scroll-mt-24 relative border-y border-line bg-surface/30 py-28 md:py-36 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[720px] h-[400px] rounded-full bg-accent/[0.07] blur-[160px] pointer-events-none" />
-        <div className="relative max-w-6xl mx-auto px-6">
-          <Reveal>
-            <SectionLabel index="03" title="Seçili Projeler" />
-          </Reveal>
-
-          <div className="mt-14 grid md:grid-cols-2 gap-6">
-            {cvData.projects.map((project, i) => (
-              <Reveal key={i} delay={i * 0.08}>
-                <article className="group h-full p-8 md:p-10 flex flex-col bg-base border border-line rounded-2xl hover:border-accent/50 hover:-translate-y-1.5 hover:shadow-[0_24px_60px_-24px_rgba(234,88,12,0.25)] transition-all duration-500">
-                  <div className="flex items-start justify-between gap-4 mb-10">
-                    <span className="font-serif italic text-5xl text-accent/90">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    {projectAwards[i] && (
-                      <span className="font-mono text-[10px] tracking-widest uppercase border border-accent/50 text-accent px-3 py-1.5 rounded-full whitespace-nowrap">
-                        {projectAwards[i]}
-                      </span>
+                {[...row, ...row].map((tech, index) => (
+                  <span
+                    key={index}
+                    aria-hidden={index >= row.length || undefined}
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[13px] text-zinc-300"
+                  >
+                    {tech.icon && (
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        className="size-3.5"
+                        fill={readableBrandColor(tech.icon.hex)}
+                      >
+                        <path d={tech.icon.path} />
+                      </svg>
                     )}
-                  </div>
-                  <h3 className="font-serif text-2xl md:text-[1.7rem] leading-tight tracking-tight">
-                    {project.title}
-                  </h3>
-                  <p className="mt-4 text-sm leading-relaxed text-muted flex-1">
-                    {project.description}
-                  </p>
-                  <p className="mt-8 font-mono text-[10px] tracking-[0.2em] uppercase text-muted/70">
-                    {project.date}
-                  </p>
-                </article>
-              </Reveal>
+                    {tech.name}
+                  </span>
+                ))}
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </Card>
 
-      {/* ─── Ödüller ─── */}
-      <section className="max-w-6xl mx-auto px-6 py-28 md:py-36">
-        <Reveal>
-          <SectionLabel index="04" title="Ödüller & Başarılar" />
-        </Reveal>
-
-        <div className="mt-14">
-          {cvData.achievements.map((achievement, i) => (
-            <Reveal key={i} delay={i * 0.04}>
-              <div className="group flex items-baseline gap-6 md:gap-10 py-6 border-t border-line hover:bg-surface/60 transition-colors duration-300 md:px-4 md:-mx-4 rounded-lg">
-                <span className="font-serif italic text-2xl text-accent shrink-0 w-10">
-                  {String(i + 1).padStart(2, '0')}
+        {/* Araçlar */}
+        <Link
+          href="/araclar"
+          className="fade-up group relative col-span-2 overflow-hidden rounded-3xl p-px transition-transform duration-300 hover:-translate-y-1"
+          style={{ animationDelay: '440ms' }}
+        >
+          {/* The rotating light is masked to the 1px ring, so the card itself can stay translucent glass */}
+          <span aria-hidden="true" className="border-ring absolute inset-0 overflow-hidden rounded-3xl p-px">
+            <span className="absolute left-1/2 top-1/2 aspect-square w-[220%] -translate-x-1/2 -translate-y-1/2 animate-[spin_7s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_250deg,rgba(125,211,252,0.95)_315deg,rgba(94,234,212,0.95)_350deg,transparent_360deg)] motion-reduce:animate-none" />
+          </span>
+          <span aria-hidden="true" className="absolute inset-0 rounded-3xl border border-white/15" />
+          <div
+            className={`spotlight relative flex h-full flex-col gap-6 overflow-hidden rounded-[calc(1.5rem-1px)] bg-[#0a1530]/65 p-5 sm:flex-row sm:items-center sm:p-6 ${glassShadow}`}
+          >
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-linear-to-br from-blue-500/[0.16] via-sky-500/[0.05] to-cyan-500/[0.06]"
+            />
+            <div className="relative flex-1">
+              <div className="flex items-center gap-2">
+                <CardLabel icon={Wrench}>Araçlar</CardLabel>
+                <span className="rounded-full bg-sky-400/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-sky-200">
+                  Yeni
                 </span>
-                <p className="font-serif text-lg md:text-2xl tracking-tight leading-snug">
-                  {achievement}
-                </p>
               </div>
-            </Reveal>
-          ))}
-          <div className="border-t border-line" />
-        </div>
-      </section>
-
-      {/* ─── İletişim / Footer ─── */}
-      <footer id="iletisim" className="scroll-mt-24 relative border-t border-line overflow-hidden">
-        <div className="absolute -bottom-56 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-accent/10 blur-[180px] pointer-events-none" />
-
-        <div className="relative max-w-6xl mx-auto px-6 py-28 md:py-36">
-          <Reveal>
-            <SectionLabel index="05" title="İletişim" />
-          </Reveal>
-
-          <Reveal delay={0.1}>
-            <a href={`mailto:${cvData.personal.email}`} className="group block mt-14">
-              <span className="font-serif text-[clamp(2.4rem,7vw,6rem)] leading-[1.05] tracking-tight">
-                Birlikte <em className="italic text-accent">çalışalım</em>
-                <span className="inline-block ml-4 text-accent transition-transform duration-500 group-hover:translate-x-3 group-hover:-translate-y-3">
-                  ↗
-                </span>
+              <p className="mt-4 text-xl font-semibold tracking-tight text-zinc-50">
+                Kendi geliştirdiğim küçük araçlar
+              </p>
+              <p className="mt-1.5 text-sm text-zinc-400">
+                {tools.length > 0 ? `${tools.length} araç yayında` : 'İlk araçlar çok yakında burada.'}
+              </p>
+              <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-sky-300">
+                Araçlara göz at
+                <ArrowRight
+                  aria-hidden="true"
+                  className="size-4 transition-transform duration-300 group-hover:translate-x-1"
+                />
               </span>
-            </a>
-            <p className="mt-6 text-muted max-w-md leading-relaxed">
-              Yeni projeler, iş birlikleri ve danışmanlık talepleri için iletişime
-              geçebilirsiniz.
-            </p>
-          </Reveal>
-
-          <Reveal delay={0.2}>
-            <div className="mt-20 grid sm:grid-cols-2 md:grid-cols-4 gap-8 font-mono text-xs tracking-wider">
-              <div>
-                <p className="text-muted uppercase tracking-[0.2em] mb-3">E-posta</p>
-                <a
-                  href={`mailto:${cvData.personal.email}`}
-                  className="link-underline break-all"
-                >
-                  {cvData.personal.email}
-                </a>
-              </div>
-              <div>
-                <p className="text-muted uppercase tracking-[0.2em] mb-3">Telefon</p>
-                <span>{cvData.personal.phone}</span>
-              </div>
-              <div>
-                <p className="text-muted uppercase tracking-[0.2em] mb-3">GitHub</p>
-                <a
-                  href={cvData.personal.social.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link-underline"
-                >
-                  @emreatalayy ↗
-                </a>
-              </div>
-              <div>
-                <p className="text-muted uppercase tracking-[0.2em] mb-3">LinkedIn</p>
-                <a
-                  href={cvData.personal.social.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link-underline"
-                >
-                  /in/emreatalayy ↗
-                </a>
-              </div>
             </div>
-          </Reveal>
-        </div>
-
-        <div className="relative border-t border-line">
-          <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row justify-between gap-2 font-mono text-[10px] tracking-[0.25em] uppercase text-muted">
-            <span>© 2026 Yunus Emre Atalay — Tüm hakları saklıdır</span>
-            <span>İstanbul, Türkiye</span>
+            <ToolStack className="hidden shrink-0 self-center sm:block" />
           </div>
-        </div>
-      </footer>
+        </Link>
+      </SpotlightGrid>
     </main>
   );
 }

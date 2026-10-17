@@ -1,105 +1,87 @@
+import { Bot, BrainCircuit, DatabaseZap, MessageSquareText, ScanEye, ScanSearch, Workflow } from "lucide-react";
+import {
+    siCplusplus,
+    siDocker,
+    siFastapi,
+    siGit,
+    siKeras,
+    siLangchain,
+    siN8n,
+    siNextdotjs,
+    siNodedotjs,
+    siNumpy,
+    siOpencv,
+    siPandas,
+    siPython,
+    siPytorch,
+    siReact,
+    siScikitlearn,
+    siSupabase,
+    siTensorflow,
+    siTypescript,
+} from "simple-icons";
+
+type Tech = { name: string; icon?: { path: string; hex: string } };
+
 export const cvData = {
-    personal: {
-        name: "Yunus Emre Atalay",
-        title: "Bilgisayar Mühendisi | Yapay Zekâ Uzmanı",
-        email: "emreatalay852@gmail.com",
-        phone: "(506) 056-3350",
-        location: "İstanbul - Trabzon",
-        social: {
-            github: "https://github.com/emreatalayy",
-            linkedin: "https://www.linkedin.com/in/emreatalayy/",
-        },
+    name: "Yunus Emre Atalay",
+    title: "Bilgisayar Mühendisi",
+    bio: "Merhaba, ben Emre. Doğal dil işleme, büyük dil modelleri ve yapay zekâ ajanları üzerine çalışıyorum. Bugünlerde çoğunlukla RAG tabanlı sistemler ve otomasyon projeleri geliştiriyorum.",
+    email: "emreatalay852@gmail.com",
+    social: {
+        github: { url: "https://github.com/emreatalayy", handle: "@emreatalayy" },
+        linkedin: { url: "https://www.linkedin.com/in/emreatalayy/", handle: "in/emreatalayy" },
     },
-    education: [
-        {
-            school: "Karadeniz Teknik Üniversitesi",
-            degree: "Bilgisayar Mühendisliği Yüksek Lisans",
-            date: "Devam ediyor",
-            gpa: "3.00/4.00",
-            location: "Trabzon/TR",
-        },
-        {
-            school: "Karadeniz Teknik Üniversitesi",
-            degree: "Bilgisayar Mühendisliği Lisans",
-            date: "07.2024",
-            gpa: "3.03/4.00",
-            location: "Trabzon/TR",
-            details: "KTÜ Yapay Zeka Kulübü Yönetim Kurulu Başkan Yardımcısı ve Ar-Ge Başkanı",
-        },
+    current: {
+        company: "Zephlex Finansal Teknolojiler",
+        role: "Yapay Zekâ Mühendisi · Uzaktan",
+        since: "Aralık 2025'ten beri",
+    },
+    location: {
+        city: "İstanbul",
+        timeZone: "Europe/Istanbul",
+    },
+    education: {
+        school: "Karadeniz Teknik Üniversitesi",
+        department: "Bilgisayar Mühendisliği",
+        degrees: [
+            { level: "Yüksek lisans", status: "2025 – 2026" },
+            { level: "Lisans", status: "2019 – 2024" },
+        ],
+    },
+    focus: [
+        { label: "Doğal Dil İşleme", icon: MessageSquareText },
+        { label: "Büyük Dil Modelleri", icon: BrainCircuit },
+        { label: "RAG", icon: DatabaseZap },
+        { label: "Yapay Zekâ Ajanları", icon: Bot },
+        { label: "Açıklanabilir YZ", icon: ScanSearch },
+        { label: "Görüntü İşleme", icon: ScanEye },
+        { label: "Otomasyon", icon: Workflow },
     ],
-    experience: [
-        {
-            company: "Zephlex Finansal Teknolojiler AŞ",
-            role: "Yapay Zekâ Mühendisi (Uzaktan)",
-            date: "Aralık 2025 – Şu an",
-            description: "Finansal teknolojiler, RAG, AI Agent sistemleri, n8n üzerinden otomasyon projeleri üzerine çalışıyorum.",
-        },
-        {
-            company: "MİNTY TEKNOLOJİ",
-            role: "Yapay Zekâ Mühendisi",
-            date: "Mayıs 2025 – Kasım 2025",
-            location: "Trabzon, TR",
-            description: "Açıklanabilir Yapay Zekâ (XAI) ve Büyük Dil Modelleri (LLM) üzerinde çalışmalar. XAI tekniklerini ve LLM mimarilerini geliştirmek ve denemek.",
-        },
-        {
-            company: "AD-ASTRA TEKNOLOJİ GRUP",
-            role: "Stajyer Mühendis",
-            date: "Ağustos 2024 – Eylül 2024",
-            location: "Ankara, TR",
-            description: "Unity ile oyun geliştirme, pekiştirmeli öğrenme ile yapay zekâ modelleri eğitimi. Unity ortamında pekiştirmeli öğrenme tekniklerini kullanarak gerçek senaryo AI modeli eğitimi.",
-        },
-        {
-            company: "VANEMAR TEKNOLOJİ",
-            role: "Stajyer Mühendis",
-            date: "Temmuz 2023 – Eylül 2023",
-            location: "Ankara, TR",
-            description: "Doğal Dil İşleme (NLP) alanında araştırmalar. Yapay zekâ algoritmalarının denizcilik sektöründeki potansiyel uygulamaları. LLM fine-tuning araştırmaları.",
-        },
-        {
-            company: "KTÜ Yapay Zekâ Kulübü",
-            role: "Yönetim Kurulu Başkanı",
-            date: "Temmuz 2022 – Haziran 2024",
-            location: "Trabzon, TR",
-            description: "Kulüp yönetimi ve Teknofest projelerinde liderlik.",
-        },
-    ],
-    projects: [
-        {
-            title: "KTÜ BİTİRME PROJESİ – TURKCELL GLOBAL BİLGİ",
-            date: "Kasım 2023 – Haziran 2024",
-            description: "D-A-T BOT: CNN ile görüntüden, LSTM ile metinden duygu analizi yapan, RAG ve Prompt Engineering ile güçlendirilmiş empati yeteneğine sahip chatbot. Global-CENG yarışmasında 1.lik.",
-        },
-        {
-            title: "VAKIFBANK HACK TO THE FUTURE",
-            date: "Aralık 2024",
-            description: "Duygu durumunu anlayarak empati kurabilen, kişiselleştirilmiş bankacılık deneyimi sunan AI asistanı. En Yenilikçi Teknolojik Çözüm Ödülü.",
-        },
-        {
-            title: "2025 TÜRKÇE DOĞAL DİL İŞLEME YARIŞMASI PROJESİ",
-            date: "Ağustos 2025",
-            description: "Turkcell müşteri hizmetleri simülasyonu. React, FastAPI, PyTorch, Coqui XTTS içeren full-stack yapı. Senaryo kategorisinde 3.lük.",
-        },
-        {
-            title: "N8N AI AGENT OTOMASYON",
-            date: "Eylül 2025",
-            description: "n8n tabanlı WhatsApp AI Agent. Evolution API, Supabase ve n8n kullanılarak geliştirilen, sipariş ve kargo takibi yapabilen akıllı asistan.",
-        },
-    ],
-    skills: [
-        "Python", "C/C++", "C#", "JavaScript/TypeScript",
-        "React", "Next.js", "FastAPI", "Node.js",
-        "PyTorch", "TensorFlow", "Keras", "Sklearn",
-        "Doğal Dil İşleme (NLP)", "Derin Öğrenme", "Makine Öğrenmesi",
-        "Büyük Dil Modelleri (LLM)", "RAG", "Langchain", "Yapay Zekâ Ajanları",
-        "OpenCV", "Numpy", "Pandas",
-        "n8n", "Supabase", "Docker", "Git"
-    ],
-    achievements: [
-        "2025 Teknofest Türkçe Doğal Dil İşleme Yarışması – 3.lük Derecesi",
-        "2025 Teknofest Savaşan İHA – Finalist",
-        "2024 Vakıfbank Hack to the Future Yarışması – En Yenilikçi Teknolojik Çözüm Ödülü",
-        "2024 Teknofest T3 AI Hackathon – 3.lük Derecesi",
-        "2024 Teknofest Sağlıkta Yapay Zekâ Yarışması – Takım Kaptanı – Finalist",
-        "2024 Teknofest Hava Savunma Sistemleri Yarışması – Yazılım Lideri – Finalist",
-    ]
+    stack: [
+        [
+            { name: "Python", icon: siPython },
+            { name: "PyTorch", icon: siPytorch },
+            { name: "TensorFlow", icon: siTensorflow },
+            { name: "Keras", icon: siKeras },
+            { name: "scikit-learn", icon: siScikitlearn },
+            { name: "LangChain", icon: siLangchain },
+            { name: "OpenCV", icon: siOpencv },
+            { name: "NumPy", icon: siNumpy },
+            { name: "Pandas", icon: siPandas },
+        ],
+        [
+            { name: "TypeScript", icon: siTypescript },
+            { name: "React", icon: siReact },
+            { name: "Next.js", icon: siNextdotjs },
+            { name: "FastAPI", icon: siFastapi },
+            { name: "Node.js", icon: siNodedotjs },
+            { name: "n8n", icon: siN8n },
+            { name: "Supabase", icon: siSupabase },
+            { name: "Docker", icon: siDocker },
+            { name: "Git", icon: siGit },
+            { name: "C/C++", icon: siCplusplus },
+            { name: "C#" },
+        ],
+    ] satisfies Tech[][],
 };
