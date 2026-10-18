@@ -1,0 +1,50 @@
+<div data-panels>
+  <svg viewBox="0 0 320 260" role="img" aria-label="LLM'den gelen cevap: teknik ekibi öneren ama fatura ekibini de anan serbest bir paragraf. Altında yapılması gereken ek işler: metni ayrıştırmak, kalıba uyup uymadığına bakmak ve modelin ne kadar emin olduğunu tahmin etmek.">
+    <text x="16" y="28" font-size="14" font-weight="600" fill="#f0f9ff">LLM'den gelen</text>
+    <text x="16" y="46" font-size="12" fill="rgba(255,255,255,0.55)">Okunup ayıklanacak bir paragraf</text>
+    <rect x="16" y="62" width="288" height="118" rx="14" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.18)" />
+    <g font-size="12.5" fill="rgba(255,255,255,0.8)">
+      <text x="30" y="88">“Bu talep büyük ihtimalle teknik</text>
+      <text x="30" y="108">ekibi ilgilendiriyor, çünkü ödeme</text>
+      <text x="30" y="128">sayfasında zaman aşımı var. Yine</text>
+      <text x="30" y="148">de fatura ekibinin bakması da</text>
+      <text x="30" y="168">faydalı olabilir…”</text>
+    </g>
+    <g font-size="12" fill="rgba(255,255,255,0.6)">
+      <text x="16" y="204">→ metinden cevabı ayıkla</text>
+      <text x="16" y="224">→ kalıba uyuyor mu, kontrol et</text>
+      <text x="16" y="244">→ ne kadar emin, tahmin et</text>
+    </g>
+  </svg>
+  <svg viewBox="0 0 320 260" role="img" aria-label="Jev'den gelen cevap: ekip sorusu için teknik 0,82, fatura 0,12, satış 0,06 olasılıkları ve 0,73 güven skoru. Engelleyici mi sorusu için 0,91. Bu sonuç doğrudan koda verilebiliyor.">
+    <text x="16" y="28" font-size="14" font-weight="600" fill="#f0f9ff">Jev'den gelen</text>
+    <text x="16" y="46" font-size="12" fill="rgba(255,255,255,0.55)">Koda hazır bir karar</text>
+    <rect x="16" y="62" width="288" height="158" rx="14" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.18)" />
+    <g style="font-family: var(--font-geist-mono), ui-monospace, monospace">
+      <text x="30" y="88" font-size="12.5" fill="#7dd3fc">ekip: "teknik"</text>
+      <text x="290" y="88" font-size="11.5" text-anchor="end" fill="rgba(255,255,255,0.6)">güven 0,73</text>
+    </g>
+    <g font-size="12" fill="rgba(255,255,255,0.75)">
+      <text x="30" y="118">teknik</text>
+      <text x="30" y="142">fatura</text>
+      <text x="30" y="166">satış</text>
+    </g>
+    <rect x="86" y="108" width="150" height="12" rx="3" fill="rgba(255,255,255,0.06)" />
+    <rect x="86" y="132" width="150" height="12" rx="3" fill="rgba(255,255,255,0.06)" />
+    <rect x="86" y="156" width="150" height="12" rx="3" fill="rgba(255,255,255,0.06)" />
+    <rect x="86" y="108" width="123" height="12" rx="3" fill="#7dd3fc" />
+    <rect x="86" y="132" width="18" height="12" rx="3" fill="rgba(255,255,255,0.35)" />
+    <rect x="86" y="156" width="9" height="12" rx="3" fill="rgba(255,255,255,0.35)" />
+    <g font-size="11.5" text-anchor="end" fill="rgba(255,255,255,0.75)" style="font-family: var(--font-geist-mono), ui-monospace, monospace">
+      <text x="290" y="118">0,82</text>
+      <text x="290" y="142">0,12</text>
+      <text x="290" y="166">0,06</text>
+    </g>
+    <line x1="30" y1="184" x2="290" y2="184" stroke="rgba(255,255,255,0.1)" />
+    <g style="font-family: var(--font-geist-mono), ui-monospace, monospace" font-size="12.5">
+      <text x="30" y="206" fill="rgba(255,255,255,0.75)">engelleyici mi?</text>
+      <text x="290" y="206" text-anchor="end" fill="#7dd3fc">0,91</text>
+    </g>
+    <text x="16" y="244" font-size="12" fill="rgba(255,255,255,0.6)">→ doğrudan bir if bloğuna</text>
+  </svg>
+</div>

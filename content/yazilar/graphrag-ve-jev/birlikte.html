@@ -1,0 +1,49 @@
+<svg data-narrow viewBox="0 0 400 500" role="img" aria-label="Önerilen akış: Soru gelir. Jev sorunun yerel mi bütüne mi dair olduğunu seçer. GraphRAG grafik araması yirmi parça ve ilişkilerini getirir. Jev her parça için işe yarıyor mu diye bakar. Büyük model cevabı yazar. Jev cevabın bağlama dayanıp dayanmadığını puanlar. Güven yüksekse cevap kullanıcıya, düşükse insana gider.">
+  <defs>
+    <marker id="birlikte-ok" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10z" fill="rgba(255,255,255,0.55)" />
+    </marker>
+  </defs>
+  <g stroke="rgba(255,255,255,0.4)" stroke-width="1.5" fill="none" marker-end="url(#birlikte-ok)">
+    <line x1="200" y1="64" x2="200" y2="86" />
+    <line x1="200" y1="136" x2="200" y2="158" />
+    <line x1="200" y1="208" x2="200" y2="230" />
+    <line x1="200" y1="280" x2="200" y2="302" />
+    <line x1="200" y1="352" x2="200" y2="374" />
+    <path d="M200 424 V436 H112 V450" />
+    <path d="M200 436 H288 V450" />
+  </g>
+
+  <rect x="30" y="16" width="340" height="48" rx="12" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.3)" />
+  <text x="200" y="45" font-size="14" text-anchor="middle" fill="#f0f9ff">Soru gelir</text>
+
+  <g fill="rgba(251,146,60,0.1)" stroke="#fb923c">
+    <rect x="30" y="88" width="340" height="48" rx="12" />
+    <rect x="30" y="232" width="340" height="48" rx="12" />
+    <rect x="30" y="376" width="340" height="48" rx="12" />
+  </g>
+  <rect x="30" y="160" width="340" height="48" rx="12" fill="rgba(125,211,252,0.1)" stroke="#7dd3fc" />
+  <rect x="30" y="304" width="340" height="48" rx="12" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.6)" />
+
+  <g font-size="10.5" letter-spacing="0.06em" style="font-family: var(--font-geist-mono), ui-monospace, monospace">
+    <text x="48" y="106" fill="#fb923c">JEV · SEÇİM</text>
+    <text x="48" y="178" fill="#7dd3fc">GRAPHRAG</text>
+    <text x="48" y="250" fill="#fb923c">JEV · DOĞRU MU? ×20</text>
+    <text x="48" y="322" fill="rgba(255,255,255,0.7)">BÜYÜK MODEL</text>
+    <text x="48" y="394" fill="#fb923c">JEV · PUAN</text>
+  </g>
+  <g font-size="14" fill="#f0f9ff">
+    <text x="48" y="125">Yerel bir soru mu, bütüne mi dair?</text>
+    <text x="48" y="197">Grafik araması: 20 parça + ilişkiler</text>
+    <text x="48" y="269">Bu parça işe yarıyor mu?</text>
+    <text x="48" y="341">Temiz bağlamla cevabı yaz</text>
+    <text x="48" y="413">Cevap bağlama dayanıyor mu?</text>
+  </g>
+
+  <rect x="30" y="452" width="165" height="36" rx="10" fill="rgba(25,158,112,0.15)" stroke="#199e70" />
+  <rect x="205" y="452" width="165" height="36" rx="10" fill="rgba(213,81,129,0.15)" stroke="#d55181" />
+  <g font-size="12" text-anchor="middle" fill="#f0f9ff">
+    <text x="112" y="475">Güven yüksek: kullanıcıya</text>
+    <text x="288" y="475">Güven düşük: insana</text>
+  </g>
+</svg>
