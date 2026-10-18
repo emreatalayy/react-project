@@ -7,6 +7,7 @@ const tabs = [
   { href: '/', label: 'Hakkımda', isActive: (path: string) => path === '/' },
   { href: '/araclar', label: 'Araçlar', isActive: (path: string) => path.startsWith('/araclar') },
   { href: '/analiz', label: 'Analiz', isActive: (path: string) => path.startsWith('/analiz') },
+  { href: '/yazilar', label: 'Yazılar', isActive: (path: string) => path.startsWith('/yazilar') },
 ];
 
 export function NavTabs() {
@@ -27,7 +28,7 @@ export function NavTabs() {
           key={tab.href}
           href={tab.href}
           aria-current={index === activeIndex ? 'page' : undefined}
-          className={`relative rounded-full px-4 py-1.5 text-center text-sm font-medium transition-colors duration-300 ${
+          className={`relative rounded-full px-2 py-1.5 text-center text-[13px] font-medium sm:px-4 sm:text-sm transition-colors duration-300 ${
             index === activeIndex ? 'text-white' : 'text-zinc-400 hover:text-zinc-100'
           }`}
         >
