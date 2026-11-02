@@ -13,6 +13,8 @@ let playing: HTMLAudioElement | null = null;
 export function prepareAudio() {
   if (clipsRequested || typeof window === 'undefined') return;
   clipsRequested = true;
+  // Chrome lists no voices until asked once, so the first word spoken would get the default voice
+  if (hasSynthesis()) window.speechSynthesis.getVoices();
   fetch(`${AUDIO_DIR}/manifest.json`)
     .then((response) => (response.ok ? response.json() : null))
     .then((manifest: Record<string, string> | null) => {
@@ -32,17 +34,40 @@ export function canSpeak() {
   return clips !== null || hasSynthesis();
 }
 
+// Apple's novelty voices (Bells, Zarvox...) and its old robotic ones, which come first in the list on a Mac
+const POOR_VOICES =
+  /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|fred|good news|hysterical|jester|junior|kathy|organ|princess|ralph|superstar|trinoids|whisper|wobble|zarvox)\b/;
+
+// The first English voice is often a robotic one (Microsoft David in Chrome on Windows) although the
+// same device has a far more natural one: Edge's "Natural" voices, Chrome's Google voices, Siri's
+function voiceScore(voice: SpeechSynthesisVoice) {
+  const name = voice.name.toLowerCase();
+  let score = voice.lang.replace('_', '-') === 'en-US' ? 2 : 1;
+  if (/natural|neural|premium|enhanced/.test(name)) score += 8;
+  else if (name.includes('google')) score += 6;
+  else if (/samantha|allison|\bava\b|susan|karen|moira|serena|daniel/.test(name)) score += 4;
+  if (/aria|jenny|\bava\b|emma|samantha/.test(name)) score += 1;
+  if (POOR_VOICES.test(name)) score -= 10;
+  return score;
+}
+
 // Voices load asynchronously, so the list is read again on every call
 function englishVoice() {
-  const voices = window.speechSynthesis.getVoices();
-  return voices.find((voice) => voice.lang === 'en-US') ?? voices.find((voice) => voice.lang.startsWith('en')) ?? null;
+  return window.speechSynthesis
+    .getVoices()
+    .filter((voice) => voice.lang.toLowerCase().startsWith('en'))
+    .reduce<SpeechSynthesisVoice | null>(
+      (best, voice) => (!best || voiceScore(voice) > voiceScore(best) ? voice : best),
+      null,
+    );
 }
 
 function synthesize(text: string, slow: boolean) {
   if (!hasSynthesis()) return;
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'en-US';
-  utterance.voice = englishVoice();
+  const voice = englishVoice();
+  utterance.voice = voice;
+  utterance.lang = voice?.lang.replace('_', '-') ?? 'en-US';
   utterance.rate = slow ? 0.6 : 0.95;
   window.speechSynthesis.speak(utterance);
 }
