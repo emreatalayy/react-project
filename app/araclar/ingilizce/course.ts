@@ -1,3 +1,5 @@
+import { stories } from './stories';
+
 // A1 English course for Turkish speakers. Exercises are generated from this data (see exercises.ts),
 // so a lesson only lists its words, sentences and fill-in-the-blank items.
 
@@ -48,9 +50,21 @@ export type Unit = {
   emoji: string;
   /** Earned by opening the unit's chest, the review at the end of the unit */
   sticker: { emoji: string; name: string };
+  /** Something a parent can play at home with the child, shown in the parent corner */
+  homeIdea: string;
   tips: Tip[];
   lessons: Lesson[];
 };
+
+export type Speaker = 'findik' | 'elif' | 'can' | 'deniz';
+
+export type StoryLine = { speaker: Speaker; en: string; tr: string };
+
+/** Asked after line `after` (0-based); `answer` is one of `options` */
+export type StoryQuestion = { after: number; prompt: string; options: string[]; answer: string };
+
+/** A short dialogue near the end of a unit, read line by line with a few questions */
+export type Story = { unitId: string; title: string; lines: StoryLine[]; questions: StoryQuestion[] };
 
 export const units: Unit[] = [
   {
@@ -60,6 +74,8 @@ export const units: Unit[] = [
     color: '#1cb0f6',
     emoji: '👋',
     sticker: { emoji: '🦜', name: 'Konuşkan papağan' },
+    homeIdea:
+      'Bir gün boyunca evde selamları İngilizce yapın: sabah “Good morning!”, yatarken “Good night!”. Unutan, ötekine bir puan verir.',
     tips: [
       {
         title: 'Günün saatine göre selam',
@@ -154,6 +170,8 @@ export const units: Unit[] = [
     color: '#a560e8',
     emoji: '🙋',
     sticker: { emoji: '😎', name: 'Havalı' },
+    homeIdea:
+      'Oyuncak bebekler ya da peluşlarla tanışma oyunu oynayın: her biri kendini tanıtsın, “Hello, my name is …”, “I am a doctor.” gibi.',
     tips: [
       {
         title: 'to be: am / is / are',
@@ -273,6 +291,8 @@ export const units: Unit[] = [
     color: '#ff4b4b',
     emoji: '🎨',
     sticker: { emoji: '🌈', name: 'Gökkuşağı' },
+    homeIdea:
+      'Evde “Something red!” oyunu oynayın: bir rengi İngilizce söyleyin, çocuk o renkte bir eşya bulup getirsin. Sonra sırayı ona verin.',
     tips: [
       {
         title: 'Bir şeyin rengi',
@@ -390,6 +410,8 @@ export const units: Unit[] = [
     color: '#58cc02',
     emoji: '🐾',
     sticker: { emoji: '🦁', name: 'Aslan yürekli' },
+    homeIdea:
+      'Hayvan sesi tahmini: siz bir hayvan sesi çıkarın, çocuk İngilizce adını söylesin, “A cow!” gibi. Sonra o ses çıkarsın, siz bilin.',
     tips: [
       {
         title: 'Benim bir ... var',
@@ -512,12 +534,147 @@ export const units: Unit[] = [
     ],
   },
   {
+    id: 'vucudumuz',
+    title: 'Vücudumuz',
+    description: 'Yüzümüz, ellerimiz, ayaklarımız ve hareket komutları',
+    color: '#ffc800',
+    emoji: '🖐️',
+    sticker: { emoji: '🦸', name: 'Süper kahraman' },
+    homeIdea:
+      '“Fındık diyor ki” oyunu oynayın: “Touch your nose!”, “Clap your hands!” deyin, çocuk söyleneni yapsın. Sonra sırayı ona verin, o size komut versin.',
+    tips: [
+      {
+        title: 'Bir göz, iki göz',
+        body: 'Birden fazla olunca kelimenin sonuna -s gelir: one eye, two eyes. Ama bazıları değişir: foot olur feet, tooth olur teeth.',
+        examples: [
+          { en: 'I have two eyes.', tr: 'İki gözüm var.' },
+          { en: 'two feet', tr: 'iki ayak' },
+        ],
+      },
+      {
+        title: 'Komut vermek',
+        body: 'Touch your nose gibi cümleler yapılacak işle başlar. your “senin” demektir: your nose, senin burnun.',
+        examples: [
+          { en: 'Touch your nose.', tr: 'Burnuna dokun.' },
+          { en: 'Clap your hands.', tr: 'Ellerini çırp.' },
+        ],
+      },
+      {
+        title: 'have ve has',
+        body: 'Sende bir şey varsa have dersin: I have ten fingers. Kedi için, ya da he ve she için has kullanılır: The cat has big ears.',
+        examples: [{ en: 'The cat has big ears.', tr: 'Kedinin büyük kulakları var.' }],
+      },
+    ],
+    lessons: [
+      {
+        id: 'yuzum',
+        title: 'Yüzüm',
+        words: [
+          { en: 'eye', tr: 'göz', emoji: '👁️' },
+          { en: 'ear', tr: 'kulak', emoji: '👂' },
+          { en: 'nose', tr: 'burun', emoji: '👃' },
+          { en: 'mouth', tr: 'ağız', emoji: '👄' },
+          { en: 'tooth', tr: 'diş', emoji: '🦷' },
+        ],
+        sentences: [
+          { en: 'I have two eyes.', tr: 'İki gözüm var.', trAlt: ['Benim iki gözüm var.'] },
+          { en: 'Touch your nose.', tr: 'Burnuna dokun.', trAlt: ['Burnunuza dokunun.', 'Burnuna dokun lütfen.'] },
+          { en: 'Open your mouth.', tr: 'Ağzını aç.', trAlt: ['Ağzınızı açın.', 'Ağzını aç lütfen.'] },
+          {
+            en: 'The cat has big ears.',
+            tr: 'Kedinin büyük kulakları var.',
+            trAlt: ['Kedinin kulakları büyük.', 'Kedinin kocaman kulakları var.'],
+          },
+          {
+            en: 'I have white teeth.',
+            tr: 'Beyaz dişlerim var.',
+            trAlt: ['Benim beyaz dişlerim var.', 'Dişlerim beyaz.', 'Benim dişlerim beyaz.'],
+          },
+        ],
+        blanks: [
+          { en: 'I ___ two eyes.', answer: 'have', options: ['have', 'has', 'am'], tr: 'İki gözüm var.' },
+          { en: 'The cat ___ big ears.', answer: 'has', options: ['have', 'has', 'is'], tr: 'Kedinin büyük kulakları var.' },
+          { en: 'I have two ___.', answer: 'eyes', options: ['eye', 'eyes', 'an eye'], tr: 'İki gözüm var.' },
+        ],
+      },
+      {
+        id: 'ellerim',
+        title: 'Ellerim ve ayaklarım',
+        words: [
+          { en: 'hand', tr: 'el', emoji: '✋' },
+          { en: 'foot', tr: 'ayak', emoji: '🦶' },
+          { en: 'arm', tr: 'kol', emoji: '💪' },
+          { en: 'leg', tr: 'bacak', emoji: '🦵' },
+          { en: 'finger', tr: 'parmak', emoji: '👆' },
+        ],
+        sentences: [
+          {
+            en: 'My hands are clean.',
+            tr: 'Ellerim temiz.',
+            trAlt: ['Benim ellerim temiz.', 'Ellerim temizdir.', 'Ellerim tertemiz.'],
+          },
+          { en: 'Clap your hands.', tr: 'Ellerini çırp.', trAlt: ['Alkışla.', 'Ellerinizi çırpın.', 'El çırp.'] },
+          { en: 'I have ten fingers.', tr: 'On parmağım var.', trAlt: ['Benim on parmağım var.'] },
+          {
+            en: 'A bird has two legs.',
+            tr: 'Kuşun iki bacağı var.',
+            enAlt: ['Birds have two legs.'],
+            trAlt: ['Bir kuşun iki bacağı var.', 'Kuşların iki bacağı var.', 'Kuşun iki ayağı var.'],
+          },
+          {
+            en: 'Can you touch your feet?',
+            tr: 'Ayaklarına dokunabilir misin?',
+            trAlt: ['Ayaklarına dokunabiliyor musun?', 'Ayaklarınıza dokunabilir misiniz?', 'Sen ayaklarına dokunabilir misin?'],
+          },
+        ],
+        blanks: [
+          { en: 'My hands ___ clean.', answer: 'are', options: ['is', 'are', 'am'], tr: 'Ellerim temiz.' },
+          { en: 'I have ten ___.', answer: 'fingers', options: ['finger', 'fingers', 'a finger'], tr: 'On parmağım var.' },
+          { en: '___ your hands.', answer: 'Clap', options: ['Clap', 'Claps', 'Clapping'], tr: 'Ellerini çırp.' },
+        ],
+      },
+      {
+        id: 'bastan-ayaga',
+        title: 'Baştan ayağa',
+        words: [
+          { en: 'head', tr: 'baş', emoji: '🗣️' },
+          { en: 'hair', tr: 'saç', emoji: '💇' },
+          { en: 'face', tr: 'yüz', emoji: '🙂' },
+          { en: 'clean', tr: 'temiz', emoji: '🧼' },
+          { en: 'wash', tr: 'yıkamak', emoji: '🚿' },
+        ],
+        sentences: [
+          { en: 'Wash your face.', tr: 'Yüzünü yıka.', trAlt: ['Yüzünüzü yıkayın.', 'Yüzünü yıka lütfen.'] },
+          {
+            en: 'Her hair is long.',
+            tr: 'Onun saçı uzun.',
+            trAlt: ['Saçı uzun.', 'Onun saçları uzun.', 'Saçları uzun.', 'Onun saçı uzundur.'],
+          },
+          { en: 'My face is clean.', tr: 'Yüzüm temiz.', trAlt: ['Benim yüzüm temiz.', 'Yüzüm temizdir.'] },
+          { en: 'Shake your head.', tr: 'Başını salla.', trAlt: ['Kafanı salla.', 'Başınızı sallayın.'] },
+          {
+            en: 'I can touch my head.',
+            tr: 'Başıma dokunabilirim.',
+            trAlt: ['Ben başıma dokunabilirim.', 'Kafama dokunabilirim.', 'Ben kafama dokunabilirim.'],
+          },
+        ],
+        blanks: [
+          { en: '___ your face.', answer: 'Wash', options: ['Wash', 'Washes', 'Washing'], tr: 'Yüzünü yıka.' },
+          { en: 'Her hair ___ long.', answer: 'is', options: ['is', 'are', 'am'], tr: 'Onun saçı uzun.' },
+          { en: 'I ___ touch my head.', answer: 'can', options: ['can', 'cans', 'am'], tr: 'Başıma dokunabilirim.' },
+        ],
+      },
+    ],
+  },
+  {
     id: 'yemek',
     title: 'Yemek ve içecek',
     description: 'Kahvaltı, restoranda sipariş ve sevdiğin yemekler',
     color: '#ff9600',
     emoji: '🍎',
     sticker: { emoji: '🧁', name: 'Tatlı şef' },
+    homeIdea:
+      'Sofrada istekleri İngilizce yapın: “Water, please.”, “Bread, please.” Bir öğün boyunca sadece İngilizce istenen şey verilsin.',
     tips: [
       {
         title: 'a mı, an mı?',
@@ -635,6 +792,8 @@ export const units: Unit[] = [
     color: '#e85d9e',
     emoji: '🏡',
     sticker: { emoji: '🧸', name: 'Mutlu yuva' },
+    homeIdea:
+      'Aile fotoğraflarına birlikte bakın ve “Who is this?” diye sorun; çocuk “This is my mother.” gibi cevaplasın.',
     tips: [
       {
         title: 'have / has',
@@ -754,12 +913,153 @@ export const units: Unit[] = [
     ],
   },
   {
+    id: 'oyuncaklar',
+    title: 'Oyuncaklar',
+    description: 'Oyuncaklar, oyunlar ve birlikte oynamak',
+    color: '#7c5cff',
+    emoji: '🪀',
+    sticker: { emoji: '🎲', name: 'Oyun ustası' },
+    homeIdea:
+      'Oyuncak kutusunu birlikte açın: çocuk bir oyuncak çıkarıp İngilizce tanıtsın, “This is my robot!” gibi. Adını bilmediği oyuncakları birlikte öğrenin.',
+    tips: [
+      {
+        title: 'Let’s: Hadi …-elim',
+        body: 'Birlikte bir şey yapmayı önermek için Let’s ile başlarız. Let’s play! Hadi oynayalım!',
+        examples: [
+          { en: 'Let’s play!', tr: 'Hadi oynayalım!' },
+          { en: 'Let’s play together.', tr: 'Hadi birlikte oynayalım.' },
+        ],
+      },
+      {
+        title: 'Can I …? İzin istemek',
+        body: 'Arkadaşının oyuncağıyla oynamak istersen kibarca Can I …? diye sorarsın.',
+        examples: [{ en: 'Can I play with your ball?', tr: 'Topunla oynayabilir miyim?' }],
+      },
+      {
+        title: 'Nerede?',
+        body: 'Bir şeyi ararken Where is …? deriz. Where is my puzzle? Yapbozum nerede?',
+        examples: [{ en: 'Where is my puzzle?', tr: 'Yapbozum nerede?' }],
+      },
+    ],
+    lessons: [
+      {
+        id: 'oyuncak-kutusu',
+        title: 'Oyuncak kutusu',
+        words: [
+          { en: 'ball', tr: 'top', emoji: '🏀' },
+          { en: 'doll', tr: 'oyuncak bebek', emoji: '🪆' },
+          { en: 'kite', tr: 'uçurtma', emoji: '🪁' },
+          { en: 'robot', tr: 'robot', emoji: '🤖' },
+          { en: 'puzzle', tr: 'yapboz', emoji: '🧩' },
+        ],
+        sentences: [
+          { en: 'This is my robot.', tr: 'Bu benim robotum.', trAlt: ['Bu robotum.'] },
+          {
+            en: 'I like my kite.',
+            tr: 'Uçurtmamı severim.',
+            trAlt: ['Ben uçurtmamı severim.', 'Uçurtmamı seviyorum.', 'Ben uçurtmamı seviyorum.'],
+          },
+          { en: 'The ball is red.', tr: 'Top kırmızı.', trAlt: ['Top kırmızıdır.'] },
+          {
+            en: 'She has a doll.',
+            tr: 'Onun bir oyuncak bebeği var.',
+            trAlt: ['Bir oyuncak bebeği var.', 'Onun bir bebeği var.', 'Bir bebeği var.'],
+          },
+          { en: 'Where is my puzzle?', tr: 'Yapbozum nerede?', trAlt: ['Benim yapbozum nerede?'] },
+        ],
+        blanks: [
+          { en: 'This is ___ robot.', answer: 'my', options: ['my', 'I', 'me'], tr: 'Bu benim robotum.' },
+          { en: 'She ___ a doll.', answer: 'has', options: ['have', 'has', 'is'], tr: 'Onun bir oyuncak bebeği var.' },
+          { en: 'Where ___ my puzzle?', answer: 'is', options: ['is', 'are', 'am'], tr: 'Yapbozum nerede?' },
+        ],
+      },
+      {
+        id: 'oyun-zamani',
+        title: 'Oyun zamanı',
+        words: [
+          { en: 'bike', tr: 'bisiklet', emoji: '🚲' },
+          { en: 'train', tr: 'tren', emoji: '🚂' },
+          { en: 'drum', tr: 'davul', emoji: '🥁' },
+          { en: 'game', tr: 'oyun', emoji: '🎮' },
+          { en: 'block', tr: 'blok', emoji: '🧱' },
+        ],
+        sentences: [
+          {
+            en: 'Let’s play!',
+            tr: 'Hadi oynayalım!',
+            enAlt: ['Let us play!'],
+            trAlt: ['Haydi oynayalım!', 'Oynayalım!'],
+          },
+          {
+            en: 'Can I play with your ball?',
+            tr: 'Topunla oynayabilir miyim?',
+            trAlt: ['Senin topunla oynayabilir miyim?', 'Topunuzla oynayabilir miyim?'],
+          },
+          {
+            en: 'I can ride a bike.',
+            tr: 'Bisiklete binebilirim.',
+            trAlt: ['Ben bisiklete binebilirim.', 'Bisiklet sürebilirim.', 'Ben bisiklet sürebilirim.'],
+          },
+          { en: 'The train is fast.', tr: 'Tren hızlı.', trAlt: ['Tren hızlıdır.'] },
+          {
+            en: 'He has a big drum.',
+            tr: 'Onun büyük bir davulu var.',
+            trAlt: ['Büyük bir davulu var.', 'Onun büyük davulu var.', 'Onun kocaman bir davulu var.'],
+          },
+        ],
+        blanks: [
+          { en: '___ I play with your ball?', answer: 'Can', options: ['Can', 'Am', 'Is'], tr: 'Topunla oynayabilir miyim?' },
+          { en: 'I can ___ a bike.', answer: 'ride', options: ['ride', 'rides', 'riding'], tr: 'Bisiklete binebilirim.' },
+          { en: 'The train ___ fast.', answer: 'is', options: ['is', 'are', 'am'], tr: 'Tren hızlı.' },
+        ],
+      },
+      {
+        id: 'birlikte-oynayalim',
+        title: 'Birlikte oynayalım',
+        words: [
+          { en: 'box', tr: 'kutu', emoji: '📦' },
+          { en: 'fun', tr: 'eğlenceli', emoji: '🥳' },
+          { en: 'new', tr: 'yeni', emoji: '🆕' },
+          { en: 'together', tr: 'birlikte', emoji: '👫' },
+          { en: 'jump', tr: 'zıplamak', emoji: '🤸' },
+        ],
+        sentences: [
+          { en: 'This game is fun.', tr: 'Bu oyun eğlenceli.', trAlt: ['Bu oyun eğlencelidir.', 'Bu oyun çok eğlenceli.'] },
+          {
+            en: 'Let’s play together.',
+            tr: 'Hadi birlikte oynayalım.',
+            enAlt: ['Let us play together.'],
+            trAlt: ['Birlikte oynayalım.', 'Haydi birlikte oynayalım.'],
+          },
+          {
+            en: 'My toys are in the box.',
+            tr: 'Oyuncaklarım kutuda.',
+            trAlt: ['Benim oyuncaklarım kutuda.', 'Oyuncaklarım kutunun içinde.', 'Oyuncaklarım kutudadır.'],
+          },
+          { en: 'I have a new ball.', tr: 'Yeni bir topum var.', trAlt: ['Benim yeni bir topum var.', 'Yeni topum var.'] },
+          {
+            en: 'Can you jump?',
+            tr: 'Zıplayabilir misin?',
+            trAlt: ['Sen zıplayabilir misin?', 'Zıplayabiliyor musun?', 'Zıplayabilir misiniz?'],
+          },
+        ],
+        blanks: [
+          { en: 'My toys ___ in the box.', answer: 'are', options: ['is', 'are', 'am'], tr: 'Oyuncaklarım kutuda.' },
+          { en: 'I have a ___ ball.', answer: 'new', options: ['new', 'news', 'newly'], tr: 'Yeni bir topum var.' },
+          { en: 'This game ___ fun.', answer: 'is', options: ['is', 'are', 'am'], tr: 'Bu oyun eğlenceli.' },
+        ],
+      },
+    ],
+  },
+  {
     id: 'okulda',
     title: 'Okulda',
     description: 'Okul eşyaları ve sınıfta duyacağın cümleler',
     color: '#2b70c9',
     emoji: '🎒',
     sticker: { emoji: '🐛', name: 'Kitap kurdu' },
+    homeIdea:
+      'Okul çantasındaki eşyaları tek tek çıkarıp İngilizce adlarını söylesin: “This is my pencil.” Siz de “Open your book!” gibi komutlar verin.',
     tips: [
       {
         title: 'Sınıf komutları',
@@ -893,12 +1193,152 @@ export const units: Unit[] = [
     ],
   },
   {
+    id: 'hava-giysiler',
+    title: 'Hava ve giysiler',
+    description: 'Hava nasıl, bugün ne giyelim?',
+    color: '#0891b2',
+    emoji: '🌦️',
+    sticker: { emoji: '⛄', name: 'Kardan adam' },
+    homeIdea:
+      'Her sabah pencereden bakıp “What is the weather like?” diye sorun. Çocuk “It is sunny!” gibi cevaplasın ve o gün ne giyeceğini İngilizce söylesin: “My coat!”',
+    tips: [
+      {
+        title: 'Hava nasıl? It is …',
+        body: 'Havadan söz ederken cümleye It is ile başlarız: It is sunny. It is cold. Kısaca It’s da denir.',
+        examples: [
+          { en: 'It is sunny.', tr: 'Hava güneşli.' },
+          { en: 'It is cold today.', tr: 'Bugün hava soğuk.' },
+        ],
+      },
+      {
+        title: 'Üşüyorum: I am cold',
+        body: 'Türkçede “üşüyorum” deriz ama İngilizcede I am cold deriz. “I have cold” yanlıştır. Sıcakladıysan: I am hot.',
+        examples: [
+          { en: 'I am cold.', tr: 'Üşüyorum.' },
+          { en: 'I am hot.', tr: 'Sıcakladım.' },
+        ],
+      },
+      {
+        title: 'Giyinmek: put on',
+        body: 'Bir şeyi giymek için put on deriz. Put on your coat! Montunu giy!',
+        examples: [{ en: 'Put on your coat.', tr: 'Montunu giy.' }],
+      },
+    ],
+    lessons: [
+      {
+        id: 'hava-durumu',
+        title: 'Hava durumu',
+        words: [
+          { en: 'sunny', tr: 'güneşli', emoji: '🌤️' },
+          { en: 'rainy', tr: 'yağmurlu', emoji: '🌧️' },
+          { en: 'cloudy', tr: 'bulutlu', emoji: '☁️' },
+          { en: 'snowy', tr: 'karlı', emoji: '🌨️' },
+          { en: 'windy', tr: 'rüzgârlı', emoji: '🌬️' },
+        ],
+        sentences: [
+          {
+            en: 'It is sunny.',
+            tr: 'Hava güneşli.',
+            trAlt: ['Güneşli.', 'Hava güneşlidir.', 'Bugün hava güneşli.'],
+          },
+          {
+            en: 'It is rainy today.',
+            tr: 'Bugün hava yağmurlu.',
+            enAlt: ['It is raining today.', 'Today it is rainy.'],
+            trAlt: ['Bugün yağmurlu.', 'Hava bugün yağmurlu.', 'Bugün yağmur yağıyor.'],
+          },
+          { en: 'Is it cloudy?', tr: 'Hava bulutlu mu?', trAlt: ['Bulutlu mu?'] },
+          {
+            en: 'It is windy and cold.',
+            tr: 'Hava rüzgârlı ve soğuk.',
+            trAlt: ['Rüzgârlı ve soğuk.', 'Hava rüzgarlı ve soğuk.', 'Rüzgarlı ve soğuk.'],
+          },
+          {
+            en: 'I like snowy days.',
+            tr: 'Karlı günleri severim.',
+            trAlt: ['Ben karlı günleri severim.', 'Karlı günleri seviyorum.', 'Ben karlı günleri seviyorum.'],
+          },
+        ],
+        blanks: [
+          { en: 'It ___ sunny.', answer: 'is', options: ['is', 'are', 'am'], tr: 'Hava güneşli.' },
+          { en: '___ it cloudy?', answer: 'Is', options: ['Is', 'Are', 'Am'], tr: 'Hava bulutlu mu?' },
+          { en: 'It is windy ___ cold.', answer: 'and', options: ['and', 'is', 'the'], tr: 'Hava rüzgârlı ve soğuk.' },
+        ],
+      },
+      {
+        id: 'sicak-soguk',
+        title: 'Sıcak mı, soğuk mu?',
+        words: [
+          { en: 'hot', tr: 'sıcak', emoji: '🥵' },
+          { en: 'cold', tr: 'soğuk', emoji: '🥶' },
+          { en: 'snow', tr: 'kar', emoji: '❄️' },
+          { en: 'umbrella', tr: 'şemsiye', emoji: '☂️' },
+          { en: 'weather', tr: 'hava', emoji: '🌡️' },
+        ],
+        sentences: [
+          {
+            en: 'It is hot today.',
+            tr: 'Bugün hava sıcak.',
+            trAlt: ['Bugün sıcak.', 'Hava bugün sıcak.', 'Bugün hava sıcaktır.'],
+          },
+          { en: 'I am cold.', tr: 'Üşüyorum.', trAlt: ['Ben üşüyorum.', 'Üşüdüm.', 'Ben üşüdüm.'] },
+          {
+            en: 'Take your umbrella.',
+            tr: 'Şemsiyeni al.',
+            trAlt: ['Şemsiyenizi alın.', 'Şemsiyeni yanına al.', 'Şemsiyeni al lütfen.'],
+          },
+          { en: 'The snow is white and cold.', tr: 'Kar beyaz ve soğuk.', trAlt: ['Kar beyaz ve soğuktur.'] },
+          {
+            en: 'What is the weather like?',
+            tr: 'Hava nasıl?',
+            enAlt: ['How is the weather?'],
+            trAlt: ['Hava durumu nasıl?', 'Havalar nasıl?'],
+          },
+        ],
+        blanks: [
+          { en: 'I ___ cold.', answer: 'am', options: ['am', 'is', 'have'], tr: 'Üşüyorum.' },
+          { en: 'It is ___ today.', answer: 'hot', options: ['hot', 'hotly', 'heat'], tr: 'Bugün hava sıcak.' },
+          { en: '___ your umbrella.', answer: 'Take', options: ['Take', 'Takes', 'Taking'], tr: 'Şemsiyeni al.' },
+        ],
+      },
+      {
+        id: 'giysilerim',
+        title: 'Giysilerim',
+        words: [
+          { en: 'coat', tr: 'mont', emoji: '🧥' },
+          { en: 'shoes', tr: 'ayakkabı', emoji: '👟' },
+          { en: 'dress', tr: 'elbise', emoji: '👗' },
+          { en: 'T-shirt', tr: 'tişört', emoji: '👕' },
+          { en: 'socks', tr: 'çorap', emoji: '🧦' },
+        ],
+        sentences: [
+          { en: 'Put on your coat.', tr: 'Montunu giy.', trAlt: ['Montunuzu giyin.', 'Paltonu giy.', 'Ceketini giy.'] },
+          {
+            en: 'I like my red shoes.',
+            tr: 'Kırmızı ayakkabılarımı severim.',
+            trAlt: ['Ben kırmızı ayakkabılarımı severim.', 'Kırmızı ayakkabılarımı seviyorum.'],
+          },
+          { en: 'Her dress is pink.', tr: 'Onun elbisesi pembe.', trAlt: ['Elbisesi pembe.', 'Onun elbisesi pembedir.'] },
+          { en: 'My socks are blue.', tr: 'Çoraplarım mavi.', trAlt: ['Benim çoraplarım mavi.', 'Çoraplarım mavidir.'] },
+          { en: 'Where is my T-shirt?', tr: 'Tişörtüm nerede?', trAlt: ['Benim tişörtüm nerede?'] },
+        ],
+        blanks: [
+          { en: 'My socks ___ blue.', answer: 'are', options: ['is', 'are', 'am'], tr: 'Çoraplarım mavi.' },
+          { en: 'Put ___ your coat.', answer: 'on', options: ['on', 'of', 'at'], tr: 'Montunu giy.' },
+          { en: 'Her dress ___ pink.', answer: 'is', options: ['is', 'are', 'am'], tr: 'Onun elbisesi pembe.' },
+        ],
+      },
+    ],
+  },
+  {
     id: 'gunluk',
     title: 'Günlük hayat',
     description: 'Geniş zaman, rutinler ve hafta sonu planları',
     color: '#00b8a3',
     emoji: '⏰',
     sticker: { emoji: '🦄', name: 'Tek boynuzlu at' },
+    homeIdea:
+      'Akşam yemeğinde günü birlikte anlatın: “I wake up at seven.”, “I go to school.” Çocuk kendi gününü üç cümleyle anlatmayı denesin.',
     tips: [
       {
         title: 'Geniş zaman (Present Simple)',
@@ -1051,20 +1491,27 @@ export const units: Unit[] = [
   },
 ];
 
-/** One stop on the learning path: a lesson, or the review that closes a unit */
+/** One stop on the learning path: a lesson, the unit's story, or the review chest that closes the unit */
 export type PathNode = {
   id: string;
-  kind: 'lesson' | 'review';
+  kind: 'lesson' | 'story' | 'review';
   title: string;
   unit: Unit;
   unitIndex: number;
   lessons: Lesson[];
+  story?: Story;
 };
 
-// Lessons unlock in this order, each one after the previous is finished
-export const pathNodes: PathNode[] = units.flatMap((unit, unitIndex) => [
-  ...unit.lessons.map(
-    (lesson): PathNode => ({ id: lesson.id, kind: 'lesson', title: lesson.title, unit, unitIndex, lessons: [lesson] }),
-  ),
-  { id: `${unit.id}-tekrar`, kind: 'review', title: 'Ünite tekrarı', unit, unitIndex, lessons: unit.lessons },
-]);
+// Stops unlock in this order, each one after the previous is finished
+export const pathNodes: PathNode[] = units.flatMap((unit, unitIndex) => {
+  const story = stories.find((s) => s.unitId === unit.id);
+  return [
+    ...unit.lessons.map(
+      (lesson): PathNode => ({ id: lesson.id, kind: 'lesson', title: lesson.title, unit, unitIndex, lessons: [lesson] }),
+    ),
+    ...(story
+      ? [{ id: `${unit.id}-hikaye`, kind: 'story' as const, title: story.title, unit, unitIndex, lessons: unit.lessons, story }]
+      : []),
+    { id: `${unit.id}-tekrar`, kind: 'review', title: 'Ünite tekrarı', unit, unitIndex, lessons: unit.lessons },
+  ];
+});

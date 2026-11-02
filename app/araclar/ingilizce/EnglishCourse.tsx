@@ -1,14 +1,36 @@
 'use client';
 
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
-import { BookOpen, Check, Flame, Gift, Lock, Play, Settings, Star, Sticker, Volume2, VolumeX } from 'lucide-react';
-import { canRecognize, canSpeak } from './audio';
+import {
+  BookOpen,
+  BookText,
+  Check,
+  ChevronsRight,
+  Flame,
+  Gift,
+  Lock,
+  Play,
+  RotateCcw,
+  Settings,
+  Star,
+  Sticker,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
+import { canRecognize, canSpeak, prepareAudio } from './audio';
 import { pathNodes, units, type PathNode, type Unit } from './course';
-import { buildExercises, mistakeExercises, practiceExercises, type Exercise, type Modes } from './exercises';
+import {
+  buildExercises,
+  itemExercises,
+  jumpTestExercises,
+  practiceExercises,
+  type Exercise,
+  type Modes,
+} from './exercises';
 import styles from './ingilizce.module.css';
 import { LessonPlayer, type LessonSession } from './LessonPlayer';
 import { Mascot } from './Mascot';
-import { AlbumModal, GuideModal, ParentModal, WelcomeModal } from './Panels';
+import { AlbumModal, GuideModal, ParentModal, WelcomeModal, WordBookModal } from './Panels';
 import {
   DAILY_GOAL,
   getProgress,
@@ -16,8 +38,10 @@ import {
   recordSession,
   setMuted,
   subscribeProgress,
+  unlockBefore,
   type ProgressView,
 } from './progress';
+import { StoryPlayer } from './StoryPlayer';
 import { GREEN, MUTED, PressButton, Stars } from './ui';
 
 // Horizontal offsets that make the path wind; scaled down on phones by --snake
@@ -27,11 +51,22 @@ const card = 'rounded-[2rem] border-2 border-b-[6px] border-slate-200 bg-white';
 
 type StopState = 'done' | 'current' | 'locked';
 
+/** Items the daily review asks about at once, weakest first */
+const REVIEW_SIZE = 12;
+
+type ActiveSession = LessonSession & { jumpTo?: number };
+
 let sessionCount = 0;
 
 // Only called from click handlers; a fresh key mounts a fresh player
-function createSession(kind: LessonSession['kind'], nodeId: string | null, title: string, exercises: Exercise[]) {
-  return { key: sessionCount++, kind, nodeId, title, exercises, startedAt: Date.now() };
+function createSession(
+  kind: LessonSession['kind'],
+  nodeId: string | null,
+  title: string,
+  exercises: Exercise[],
+  extra: Partial<ActiveSession> = {},
+): ActiveSession {
+  return { key: sessionCount++, kind, nodeId, title, exercises, startedAt: Date.now(), ...extra };
 }
 
 // Unit colours are bright; text and button faces use a darker mix of them
@@ -49,10 +84,12 @@ export function EnglishCourse() {
   const progress = useSyncExternalStore(subscribeProgress, getProgress, getServerProgress);
   // Known only in the browser; false while server rendering
   const recognizes = useSyncExternalStore(subscribeNothing, canRecognize, () => false);
-  const [active, setActive] = useState<LessonSession | null>(null);
+  const [active, setActive] = useState<ActiveSession | null>(null);
+  const [story, setStory] = useState<{ node: PathNode; startedAt: number } | null>(null);
   const [openStop, setOpenStop] = useState<string | null>(null);
   const [guide, setGuide] = useState<Unit | null>(null);
   const [albumOpen, setAlbumOpen] = useState(false);
+  const [wordBookOpen, setWordBookOpen] = useState(false);
   const [parentGate, setParentGate] = useState<[number, number] | null>(null);
   const scrolledToCurrent = useRef(false);
 
@@ -60,6 +97,9 @@ export function EnglishCourse() {
   const currentIndex = pathNodes.findIndex((node) => !progress.completed[node.id]);
   const currentNode = currentIndex >= 0 ? pathNodes[currentIndex] : null;
   const finishedLessons = pathNodes.filter((node) => node.kind === 'lesson' && progress.completed[node.id]);
+  const currentUnit = currentNode?.unit ?? units[units.length - 1];
+
+  useEffect(prepareAudio, []);
 
   // A returning learner lands on the stop they are at, as the path is long
   useEffect(() => {
@@ -81,14 +121,38 @@ export function EnglishCourse() {
     return { listening: canSpeak(), speaking: progress.speaking && recognizes };
   }
 
-  function start(kind: LessonSession['kind'], nodeId: string | null, title: string, exercises: Exercise[]) {
+  function start(
+    kind: LessonSession['kind'],
+    nodeId: string | null,
+    title: string,
+    exercises: Exercise[],
+    extra?: Partial<ActiveSession>,
+  ) {
     setOpenStop(null);
-    // Saved mistakes from older course content may no longer match any exercise
-    if (exercises.length > 0) setActive(createSession(kind, nodeId, title, exercises));
+    // Saved items from older course content may no longer match any exercise
+    if (exercises.length > 0) setActive(createSession(kind, nodeId, title, exercises, extra));
   }
 
   function startNode(node: PathNode) {
-    start(node.kind, node.id, node.title, buildExercises(node, modes()));
+    if (node.kind === 'story') {
+      setOpenStop(null);
+      setStory({ node, startedAt: Date.now() });
+      return;
+    }
+    // The first time through a lesson its words, and the unit's rule for that lesson, come first
+    const lesson = node.lessons[0];
+    const lessonIndex = node.unit.lessons.indexOf(lesson);
+    const teach =
+      node.kind === 'lesson' && !progress.completed[node.id] ? { words: lesson.words, tip: node.unit.tips[lessonIndex] } : undefined;
+    start(node.kind, node.id, node.title, buildExercises(node, modes()), { teach });
+  }
+
+  function startJump(unitIndex: number) {
+    const unit = units[unitIndex];
+    start('test', null, `${unit.title}: atlama testi`, jumpTestExercises(unitIndex, modes()), {
+      test: { unitTitle: unit.title },
+      jumpTo: unitIndex,
+    });
   }
 
   function openParentCorner() {
@@ -105,25 +169,46 @@ export function EnglishCourse() {
 
       <Greeting progress={progress} next={currentNode} onStart={() => currentNode && startNode(currentNode)} />
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <ActionCard
-          emoji="🏋️"
-          title="Tekrar oyunu"
-          text={finishedLessons.length > 0 ? 'Bitirdiğin derslerden karışık' : 'İlk dersten sonra açılır'}
-          disabled={finishedLessons.length === 0}
-          onClick={() => start('practice', null, 'Tekrar oyunu', practiceExercises(finishedLessons, modes()))}
-        />
+      <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+        {progress.due.length > 0 ? (
+          <ActionCard
+            emoji="🧠"
+            title="Bugünün tekrarı"
+            text={`${progress.due.length} şeyin tekrar zamanı`}
+            highlight
+            onClick={() =>
+              start('review-due', null, 'Bugünün tekrarı', itemExercises(progress.due.slice(0, REVIEW_SIZE), modes()))
+            }
+          />
+        ) : (
+          <ActionCard
+            emoji="🏋️"
+            title="Tekrar oyunu"
+            text={finishedLessons.length > 0 ? 'Bitirdiklerinden karışık' : 'İlk dersten sonra açılır'}
+            disabled={finishedLessons.length === 0}
+            onClick={() => start('practice', null, 'Tekrar oyunu', practiceExercises(finishedLessons, modes()))}
+          />
+        )}
         <ActionCard
           emoji="🧹"
           title="Hatalarım"
-          text={progress.mistakes.length > 0 ? `${progress.mistakes.length} hata seni bekliyor` : 'Bekleyen hata yok'}
+          text={progress.mistakes.length > 0 ? `${progress.mistakes.length} hata bekliyor` : 'Bekleyen hata yok'}
           disabled={progress.mistakes.length === 0}
-          onClick={() => start('mistakes', null, 'Hatalarım', mistakeExercises(progress.mistakes, modes()))}
+          onClick={() => start('mistakes', null, 'Hatalarım', itemExercises(progress.mistakes.slice(-10), modes()))}
+        />
+        <ActionCard
+          emoji="📒"
+          title="Kelime defterim"
+          text={finishedLessons.length > 0 ? 'Öğrendiğin kelimeler' : 'İlk dersten sonra dolar'}
+          disabled={finishedLessons.length === 0}
+          onClick={() => setWordBookOpen(true)}
         />
       </div>
 
       {units.map((unit, unitIndex) => {
         const stops = pathNodes.filter((node) => node.unitIndex === unitIndex);
+        // A locked unit further down the path can be reached early by passing a test
+        const canJump = currentIndex >= 0 && pathNodes.indexOf(stops[0]) > currentIndex;
         return (
           <section key={unit.id} aria-labelledby={`unite-${unit.id}`} className="mt-10">
             <UnitBanner
@@ -132,6 +217,7 @@ export function EnglishCourse() {
               stars={stops.reduce((sum, node) => sum + (progress.completed[node.id] ? (progress.stars[node.id] ?? 1) : 0), 0)}
               maxStars={stops.length * 3}
               onGuide={() => setGuide(unit)}
+              onJump={canJump ? () => startJump(unitIndex) : undefined}
             />
             <ol className="flex flex-col items-center gap-9 pb-4 pt-14 [--snake:0.7px] sm:[--snake:1px]">
               {stops.map((node) => {
@@ -150,6 +236,8 @@ export function EnglishCourse() {
                     <PathStop
                       node={node}
                       state={state}
+                      stale={progress.stale.includes(node.id)}
+                      stickerOwned={progress.stickers.includes(`unite-${node.unit.id}`)}
                       stars={progress.stars[node.id] ?? 1}
                       mascotSide={offset > 0 ? 'left' : 'right'}
                       open={openStop === node.id}
@@ -177,10 +265,24 @@ export function EnglishCourse() {
           key={active.key}
           session={active}
           learnerName={progress.name}
-          onFinish={(result) => recordSession({ kind: active.kind, nodeId: active.nodeId, ...result })}
+          onFinish={(result) => {
+            if (active.jumpTo !== undefined && result.passed) unlockBefore(active.jumpTo);
+            return recordSession({ kind: active.kind, nodeId: active.nodeId, stars: result.stars, spoke: result.spoke });
+          }}
           onClose={() => setActive(null)}
         />
       )}
+      {story?.node.story && (
+        <StoryPlayer
+          key={story.startedAt}
+          story={story.node.story}
+          startedAt={story.startedAt}
+          learnerName={progress.name}
+          onFinish={(stars) => recordSession({ kind: 'story', nodeId: story.node.id, stars, spoke: false })}
+          onClose={() => setStory(null)}
+        />
+      )}
+      {wordBookOpen && <WordBookModal progress={progress} onClose={() => setWordBookOpen(false)} />}
       {progress.loaded && !progress.welcomed && <WelcomeModal progress={progress} />}
       {albumOpen && <AlbumModal owned={progress.stickers} onClose={() => setAlbumOpen(false)} />}
       {guide && <GuideModal unit={guide} onClose={() => setGuide(null)} />}
@@ -188,6 +290,7 @@ export function EnglishCourse() {
         <ParentModal
           progress={progress}
           recognizes={recognizes}
+          homeUnit={currentUnit}
           gate={parentGate}
           onClose={() => setParentGate(null)}
         />
@@ -290,13 +393,16 @@ function ActionCard({
   emoji,
   title,
   text,
-  disabled,
+  disabled = false,
+  highlight = false,
   onClick,
 }: {
   emoji: string;
   title: string;
   text: string;
-  disabled: boolean;
+  disabled?: boolean;
+  /** Something waiting today, like the daily review */
+  highlight?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -304,15 +410,17 @@ function ActionCard({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`${card} flex flex-col items-start gap-1 p-4 text-left transition-transform enabled:hover:-translate-y-0.5 enabled:active:translate-y-0.5 disabled:cursor-not-allowed`}
+      className={`${card} ${highlight ? 'border-amber-300 bg-amber-50' : ''} flex flex-col items-start gap-1 p-3 text-left transition-transform enabled:hover:-translate-y-0.5 enabled:active:translate-y-0.5 disabled:cursor-not-allowed sm:p-4`}
     >
-      <span aria-hidden="true" className={`text-4xl ${disabled ? 'opacity-40 grayscale' : ''}`}>
+      <span aria-hidden="true" className={`text-3xl sm:text-4xl ${disabled ? 'opacity-40 grayscale' : ''}`}>
         {emoji}
       </span>
-      <span className={`${styles.display} text-xl font-bold ${disabled ? 'text-slate-400' : 'text-slate-800'}`}>
+      <span
+        className={`${styles.display} text-lg font-bold leading-tight sm:text-xl ${disabled ? 'text-slate-400' : 'text-slate-800'}`}
+      >
         {title}
       </span>
-      <span className="text-sm font-semibold leading-snug text-slate-500">{text}</span>
+      <span className="text-xs font-semibold leading-snug text-slate-500 sm:text-sm">{text}</span>
     </button>
   );
 }
@@ -323,12 +431,15 @@ function UnitBanner({
   stars,
   maxStars,
   onGuide,
+  onJump,
 }: {
   unit: Unit;
   index: number;
   stars: number;
   maxStars: number;
   onGuide: () => void;
+  /** Set for a locked unit that can be reached early by a test */
+  onJump?: () => void;
 }) {
   return (
     <header
@@ -353,6 +464,16 @@ function UnitBanner({
           {unit.title}
         </h2>
         <p className="text-sm font-semibold text-slate-600">{unit.description}</p>
+        {onJump && (
+          <button
+            type="button"
+            onClick={onJump}
+            className="mt-2 inline-flex items-center gap-1 rounded-full border-2 border-slate-200 bg-white px-3 py-1 text-sm font-extrabold text-slate-600 transition-colors hover:bg-slate-50"
+          >
+            <ChevronsRight aria-hidden="true" className="size-4" />
+            Biliyorum, buraya atla
+          </button>
+        )}
       </div>
       <button
         type="button"
@@ -370,6 +491,8 @@ function UnitBanner({
 function PathStop({
   node,
   state,
+  stale,
+  stickerOwned,
   stars,
   mascotSide,
   open,
@@ -378,6 +501,10 @@ function PathStop({
 }: {
   node: PathNode;
   state: StopState;
+  /** Finished, but most of its words are due for a review */
+  stale: boolean;
+  /** The unit's chest sticker is in the album; a chest passed by a jump test has none */
+  stickerOwned: boolean;
   stars: number;
   mascotSide: 'left' | 'right';
   open: boolean;
@@ -387,9 +514,16 @@ function PathStop({
   const { color } = node.unit;
   const chest = node.kind === 'review';
   const lessonNumber = node.unit.lessons.findIndex((lesson) => lesson.id === node.id) + 1;
-  const subtitle = chest ? 'Ünitenin hepsinden karışık; içinde bir çıkartma var!' : `Ders ${lessonNumber} / ${node.unit.lessons.length}`;
-  const status = state === 'done' ? 'tamamlandı' : state === 'locked' ? 'kilitli' : 'sıradaki';
-  const Icon = state === 'locked' ? Lock : chest ? Gift : state === 'done' ? Check : Star;
+  const subtitle = chest
+    ? 'Ünitenin hepsinden karışık; içinde bir çıkartma var!'
+    : node.kind === 'story'
+      ? 'Fındık ve arkadaşlarından kısa bir hikâye'
+      : stale
+        ? 'Kelimeler biraz tozlanmış; bir tekrar iyi gelir!'
+        : `Ders ${lessonNumber} / ${node.unit.lessons.length}`;
+  const status = state === 'done' ? (stale ? 'tekrar zamanı' : 'tamamlandı') : state === 'locked' ? 'kilitli' : 'sıradaki';
+  const Icon =
+    state === 'locked' ? Lock : chest ? Gift : node.kind === 'story' ? BookText : state === 'done' ? Check : Star;
 
   return (
     <div data-path-stop className="relative">
@@ -399,7 +533,7 @@ function PathStop({
             className={`${styles.float} ${styles.display} relative block whitespace-nowrap rounded-2xl border-2 border-slate-200 bg-white px-3 py-1 text-lg font-bold uppercase tracking-wide`}
             style={{ color: shade(color, 35) }}
           >
-            {chest ? 'Aç beni!' : 'Başla'}
+            {chest ? 'Aç beni!' : node.kind === 'story' ? 'Hikâye' : 'Başla'}
             <span className="absolute left-1/2 top-full -mt-[6px] size-3 -translate-x-1/2 rotate-45 border-b-2 border-r-2 border-slate-200 bg-white" />
           </span>
         </span>
@@ -427,7 +561,7 @@ function PathStop({
         aria-label={`${node.unit.title}: ${node.title}, ${status}`}
         className="relative size-20 rounded-full"
       >
-        {chest && state === 'done' ? (
+        {chest && state === 'done' && stickerOwned ? (
           <span aria-hidden="true" className="text-4xl">
             {node.unit.sticker.emoji}
           </span>
@@ -442,6 +576,14 @@ function PathStop({
       {state === 'done' && !chest && (
         <span className="absolute left-1/2 top-full mt-2.5 -translate-x-1/2">
           <Stars count={stars} />
+        </span>
+      )}
+      {stale && state === 'done' && (
+        <span
+          title="Tekrar zamanı"
+          className="absolute -right-1 -top-1 grid size-8 place-items-center rounded-full border-2 border-white bg-amber-400 text-white shadow"
+        >
+          <RotateCcw aria-hidden="true" className="size-4" strokeWidth={3} />
         </span>
       )}
 
@@ -465,7 +607,7 @@ function PathStop({
                 </p>
               )}
               <PressButton face={shade(color, 35)} onClick={onStart} className="mt-4 w-full">
-                {state === 'done' ? 'Tekrar oyna' : chest ? 'Sandığı aç' : 'Başla'}
+                {state === 'done' ? (stale ? 'Tekrarla' : 'Tekrar oyna') : chest ? 'Sandığı aç' : node.kind === 'story' ? 'Oku' : 'Başla'}
               </PressButton>
             </>
           )}

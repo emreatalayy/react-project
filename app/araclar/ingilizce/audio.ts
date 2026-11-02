@@ -1,8 +1,35 @@
-// Spoken English through the browser's speech synthesis, and short feedback sounds made with Web Audio.
+// Spoken English: recorded clips when scripts/ingilizce/generate-audio.mjs has made them, the browser's
+// speech synthesis otherwise. Short feedback sounds are made with Web Audio.
 import { getProgress } from './progress';
 
-export function canSpeak() {
+const AUDIO_DIR = '/audio/ingilizce';
+
+/** English text → clip file name, from the generated manifest; null when there is none */
+let clips: Record<string, string> | null = null;
+let clipsRequested = false;
+let playing: HTMLAudioElement | null = null;
+
+/** Loads the clip list once; until it arrives (or if it is missing) speech synthesis is used */
+export function prepareAudio() {
+  if (clipsRequested || typeof window === 'undefined') return;
+  clipsRequested = true;
+  fetch(`${AUDIO_DIR}/manifest.json`)
+    .then((response) => (response.ok ? response.json() : null))
+    .then((manifest: Record<string, string> | null) => {
+      clips = manifest;
+    })
+    .catch(() => {
+      clips = null;
+    });
+}
+
+function hasSynthesis() {
   return typeof window !== 'undefined' && 'speechSynthesis' in window;
+}
+
+/** Whether English can be played at all: recorded clips or speech synthesis */
+export function canSpeak() {
+  return clips !== null || hasSynthesis();
 }
 
 // Voices load asynchronously, so the list is read again on every call
@@ -11,15 +38,27 @@ function englishVoice() {
   return voices.find((voice) => voice.lang === 'en-US') ?? voices.find((voice) => voice.lang.startsWith('en')) ?? null;
 }
 
-export function speak(text: string, slow = false) {
-  if (!canSpeak()) return;
-  const synth = window.speechSynthesis;
-  synth.cancel();
+function synthesize(text: string, slow: boolean) {
+  if (!hasSynthesis()) return;
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = 'en-US';
   utterance.voice = englishVoice();
   utterance.rate = slow ? 0.6 : 0.95;
-  synth.speak(utterance);
+  window.speechSynthesis.speak(utterance);
+}
+
+export function speak(text: string, slow = false) {
+  stopSpeaking();
+  prepareAudio();
+  const clip = clips?.[text];
+  if (!clip) {
+    synthesize(text, slow);
+    return;
+  }
+  const audio = new Audio(`${AUDIO_DIR}/${clip}`);
+  audio.playbackRate = slow ? 0.7 : 1;
+  playing = audio;
+  audio.play().catch(() => synthesize(text, slow));
 }
 
 /** Speaks only when sounds are on; for lines the page reads out by itself */
@@ -28,7 +67,9 @@ export function speakAuto(text: string) {
 }
 
 export function stopSpeaking() {
-  if (canSpeak()) window.speechSynthesis.cancel();
+  playing?.pause();
+  playing = null;
+  if (hasSynthesis()) window.speechSynthesis.cancel();
 }
 
 // The Web Speech recognition API is not in TypeScript's DOM types; only the parts used here

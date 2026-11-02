@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { Flame, Lock, Star } from 'lucide-react';
-import type { Unit } from './course';
-import { mistakeText } from './exercises';
+import { units, type Unit } from './course';
+import { itemText } from './exercises';
 import styles from './ingilizce.module.css';
 import { Mascot } from './Mascot';
-import { AVATARS, resetProgress, setMuted, setProfile, setSpeaking, type ProgressView } from './progress';
+import { AVATARS, resetProgress, setMuted, setProfile, setSpeaking, TOP_BOX, type ProgressView } from './progress';
 import { STICKERS } from './stickers';
 import { BLUE, GREEN, Modal, MUTED, PressButton, RED, SpeakButton, WeekRow } from './ui';
 
@@ -111,6 +111,55 @@ export function AlbumModal({ owned, onClose }: { owned: string[]; onClose: () =>
   );
 }
 
+// How well a word is remembered, from its spaced repetition box
+function strength(box: number) {
+  if (box >= TOP_BOX - 1) return { label: 'Ezberledin', tone: 'bg-green-100 text-green-800' };
+  if (box >= 2) return { label: 'İyi gidiyor', tone: 'bg-sky-100 text-sky-800' };
+  return { label: 'Yeni', tone: 'bg-amber-100 text-amber-800' };
+}
+
+/** Every word from the finished lessons, by unit, with its sound and how well it is remembered */
+export function WordBookModal({ progress, onClose }: { progress: ProgressView; onClose: () => void }) {
+  const groups = units
+    .map((unit) => ({ unit, words: unit.lessons.filter((lesson) => progress.completed[lesson.id]).flatMap((l) => l.words) }))
+    .filter((group) => group.words.length > 0);
+  const count = groups.reduce((sum, group) => sum + group.words.length, 0);
+  return (
+    <Modal title="Kelime defterim" onClose={onClose} className="max-w-lg">
+      <p className="mt-1 font-bold text-slate-500">{count} kelime öğrendin</p>
+      <div className="mt-4 flex flex-col gap-5">
+        {groups.map(({ unit, words }) => (
+          <section key={unit.id}>
+            <h3 className={`${styles.display} text-lg font-bold text-slate-600`}>
+              {unit.emoji} {unit.title}
+            </h3>
+            <ul className="mt-2 flex flex-col gap-1.5">
+              {words.map((word) => {
+                const level = strength(progress.memory[`w:${word.en}`]?.[0] ?? 0);
+                return (
+                  <li key={word.en} className="flex items-center gap-2 rounded-2xl border-2 border-slate-200 py-1.5 pl-2 pr-3">
+                    <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center text-2xl">
+                      {word.emoji ?? '💬'}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span lang="en" className="block font-extrabold leading-tight">
+                        {word.en}
+                      </span>
+                      <span className="block text-sm text-slate-500">{word.tr}</span>
+                    </span>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${level.tone}`}>{level.label}</span>
+                    <SpeakButton text={word.en} className="size-9" />
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </Modal>
+  );
+}
+
 export function GuideModal({ unit, onClose }: { unit: Unit; onClose: () => void }) {
   return (
     <Modal title={`${unit.emoji} ${unit.title}: ipuçları`} onClose={onClose} className="max-w-lg">
@@ -158,11 +207,14 @@ function Toggle({ label, on, onChange }: { label: string; on: boolean; onChange:
 export function ParentModal({
   progress,
   recognizes,
+  homeUnit,
   gate,
   onClose,
 }: {
   progress: ProgressView;
   recognizes: boolean;
+  /** The unit the child is on, whose at-home game is suggested */
+  homeUnit: Unit;
   gate: [number, number];
   onClose: () => void;
 }) {
@@ -215,9 +267,13 @@ export function ParentModal({
   const profileChanged = name.trim() !== progress.name || avatar !== progress.avatar;
   const recentMistakes = [...progress.mistakes]
     .reverse()
-    .map((key) => mistakeText(key))
+    .map((key) => itemText(key))
     .filter((text) => text !== null)
     .slice(0, 8);
+  const newWords = progress.newThisWeek
+    .filter((key) => key.startsWith('w:'))
+    .map((key) => itemText(key))
+    .filter((text) => text !== null);
 
   return (
     <Modal title="Ebeveyn köşesi" onClose={onClose} className="max-w-lg">
@@ -244,6 +300,29 @@ export function ParentModal({
             </dd>
           </div>
         </dl>
+      </section>
+
+      {newWords.length > 0 && (
+        <section className="mt-6">
+          <h3 className={`${styles.display} text-lg font-bold text-slate-500`}>Bu hafta öğrendiği kelimeler</h3>
+          <ul className="mt-2 flex flex-wrap gap-1.5">
+            {newWords.map((word) => (
+              <li key={word.en} className="rounded-full bg-sky-50 px-3 py-1 text-sm">
+                <span lang="en" className="font-bold">
+                  {word.en}
+                </span>
+                <span className="text-slate-500"> · {word.tr}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="mt-6 rounded-2xl border-2 border-amber-200 bg-amber-50 p-4">
+        <h3 className={`${styles.display} text-lg font-bold text-amber-800`}>
+          Evde birlikte: {homeUnit.emoji} {homeUnit.title}
+        </h3>
+        <p className="mt-1 leading-relaxed text-amber-900">{homeUnit.homeIdea}</p>
       </section>
 
       <section className="mt-6">

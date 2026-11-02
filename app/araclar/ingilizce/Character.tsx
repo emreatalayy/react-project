@@ -25,15 +25,18 @@ const CURLS = [
   [73, 41],
 ];
 
+/** Story speakers by name; prompts without one get a speaker picked from their text */
+export const SPEAKER_LOOKS = { elif: 0, can: 1, deniz: 2 } as const;
+
 // The same sentence always gets the same speaker
 function lookFor(text: string) {
   let hash = 0;
   for (const char of text) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
-  return LOOKS[hash % LOOKS.length];
+  return hash % LOOKS.length;
 }
 
-export function Character({ text, className = '' }: { text: string; className?: string }) {
-  const look = lookFor(text);
+export function Character({ text = '', who, className = '' }: { text?: string; who?: number; className?: string }) {
+  const look = LOOKS[who ?? lookFor(text)];
   const ink = '#1d1a2e';
   return (
     <svg viewBox="0 0 100 120" aria-hidden="true" className={className}>

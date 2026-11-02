@@ -1,10 +1,20 @@
 import { units, type Blank, type Lesson, type PathNode, type Sentence, type Word } from './course';
+import { explainBlank, explainSentence, missedWords } from './explain';
+import { patternSentence } from './patterns';
+import { SOUND_PAIRS, type SoundPair } from './sounds';
+import { commonInOrder, levenshtein, lowerCase, normalize, tokenize, type Lang } from './text';
 
-export type Lang = 'en' | 'tr';
+export { normalize, tokenize, type Lang };
 
 type ExerciseBody =
   | { kind: 'picture'; word: Word; options: Word[] }
+  /** Hear a word and pick its picture; the pictures carry no labels until the answer is checked */
+  | { kind: 'hear'; word: Word; options: Word[] }
   | { kind: 'select'; word: Word; options: string[] }
+  /** Look at a picture and say its English word */
+  | { kind: 'say'; word: Word }
+  /** Hear one of two words that differ in a single sound and pick which one it was */
+  | { kind: 'pair'; pair: SoundPair; said: number }
   | { kind: 'match'; pairs: Word[]; rightOrder: number[] }
   /** Build the translation of a sentence given in `from` out of word tiles */
   | { kind: 'build'; from: Lang; sentence: Sentence; tiles: string[] }
@@ -14,8 +24,11 @@ type ExerciseBody =
   | { kind: 'type'; sentence: Sentence }
   | { kind: 'blank'; blank: Blank; options: string[] };
 
-/** A wrong answer sends the exercise to the back of the queue with `attempt` raised, which resets its view */
-export type Exercise = ExerciseBody & { id: number; attempt: number };
+/**
+ * A wrong answer sends the exercise to the back of the queue with `attempt` raised, which resets its view.
+ * `generated` marks sentences built from patterns: they are practice, not course items to remember.
+ */
+export type Exercise = ExerciseBody & { id: number; attempt: number; generated?: boolean };
 
 /** What the learner has answered so far; `text` is the typed answer or the speech transcript */
 export type Draft = { choice: number | null; picked: number[]; text: string };
@@ -27,7 +40,11 @@ export type Grade = {
   correct: boolean;
   /** The expected answer, shown after a mistake */
   solution: string;
-  /** Turkish meaning, for the listening exercise that showed no text */
+  /** For each space-separated word of `solution`, whether the answer missed it */
+  missed?: boolean[];
+  /** Why the answer was wrong, when a known rule explains it */
+  why?: string;
+  /** Turkish meaning, for listening exercises that showed no text */
   meaning?: string;
   note?: string;
 };
@@ -45,6 +62,10 @@ function sample<T>(items: readonly T[], count: number) {
   return shuffle(items).slice(0, count);
 }
 
+function pickOne<T>(items: readonly T[]) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
 // Takes from `primary` first and tops up from `fallback`, skipping repeats of the same key
 function pickDistinct<T>(primary: T[], fallback: T[], count: number, keyOf: (item: T) => string, exclude: string) {
   const seen = new Set([exclude]);
@@ -57,67 +78,6 @@ function pickDistinct<T>(primary: T[], fallback: T[], count: number, keyOf: (ite
     if (picked.length === count) break;
   }
   return picked;
-}
-
-function lowerCase(text: string, lang: Lang) {
-  return text.toLocaleLowerCase(lang === 'tr' ? 'tr-TR' : 'en-US');
-}
-
-/** Words of a sentence without surrounding punctuation; apostrophes inside a word stay */
-export function tokenize(sentence: string) {
-  return sentence
-    .split(/\s+/)
-    .map((word) => word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, ''))
-    .filter(Boolean);
-}
-
-const CONTRACTIONS: Record<string, string> = {
-  "i'm": 'i am',
-  im: 'i am',
-  "you're": 'you are',
-  youre: 'you are',
-  "he's": 'he is',
-  hes: 'he is',
-  "she's": 'she is',
-  shes: 'she is',
-  "it's": 'it is',
-  "we're": 'we are',
-  "they're": 'they are',
-  theyre: 'they are',
-  "i'd": 'i would',
-  "don't": 'do not',
-  dont: 'do not',
-  "doesn't": 'does not',
-  doesnt: 'does not',
-  "isn't": 'is not',
-  isnt: 'is not',
-  "aren't": 'are not',
-  arent: 'are not',
-};
-
-/** Lower case, no punctuation, contractions spelled out: what two answers are compared on */
-export function normalize(text: string, lang: Lang) {
-  let value = text.normalize('NFC').replace(/[’‘`´]/g, "'");
-  // A Turkish keyboard easily types İ or ı into an English answer
-  value = lang === 'en' ? value.replace(/İ/g, 'I').replace(/ı/g, 'i').toLowerCase() : lowerCase(value, 'tr');
-  const words = value.replace(/[^\p{L}\p{N}'\s]/gu, ' ').split(/\s+/).filter(Boolean);
-  const expanded = lang === 'en' ? words.flatMap((word) => (CONTRACTIONS[word] ?? word).split(' ')) : words;
-  return expanded
-    .map((word) => word.replace(/'/g, ''))
-    .filter(Boolean)
-    .join(' ');
-}
-
-function levenshtein(a: string, b: string) {
-  let previous = Array.from({ length: b.length + 1 }, (_, i) => i);
-  for (let i = 1; i <= a.length; i++) {
-    const row = [i];
-    for (let j = 1; j <= b.length; j++) {
-      row[j] = Math.min(previous[j] + 1, row[j - 1] + 1, previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-    }
-    previous = row;
-  }
-  return previous[b.length];
 }
 
 let knownWords: Set<string> | null = null;
@@ -164,13 +124,18 @@ function gradeSentence(input: string, sentence: Sentence, lang: Lang, allowTypo:
       if (typo) return { correct: true, solution, note: `Küçük bir yazım hatası: “${typo.wrong}” değil, “${typo.right}”.` };
     }
   }
-  return { correct: false, solution };
+  return {
+    correct: false,
+    solution,
+    missed: missedWords(input, solution, lang),
+    why: lang === 'en' ? explainSentence(input, solution) : undefined,
+  };
 }
 
 // Speech recognition writes numbers as digits and mishears names, so digits are spelt out and
 // names are not required
 const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
-const NAMES = new Set(['anna', 'tom', 'emre', 'elif', 'ali', 'istanbul', 'trabzon']);
+const NAMES = new Set(['anna', 'tom', 'emre', 'elif', 'ali', 'can', 'deniz', 'istanbul', 'trabzon']);
 
 function spokenWords(text: string) {
   return normalize(text, 'en')
@@ -179,35 +144,46 @@ function spokenWords(text: string) {
     .filter((word) => word && !NAMES.has(word));
 }
 
-function commonInOrder(a: string[], b: string[]) {
-  let previous = new Array<number>(b.length + 1).fill(0);
-  for (const word of a) {
-    const row = [0];
-    for (let j = 1; j <= b.length; j++) row[j] = word === b[j - 1] ? previous[j - 1] + 1 : Math.max(previous[j], row[j - 1]);
-    previous = row;
-  }
-  return previous[b.length];
-}
-
-// Three of every four words heard in the right order is enough: recognition is not perfect either
+// Three of every four words heard in the right order is enough: recognition is not perfect either.
+// The words that were not heard are named, so the child knows which ones to say more clearly.
 function gradeSpeech(transcript: string, sentence: Sentence): Grade {
   const heard = spokenWords(transcript);
-  const correct = accepted(sentence, 'en').some((answer) => {
+  let best = { score: -1, missing: [] as string[] };
+  for (const answer of accepted(sentence, 'en')) {
     const expected = spokenWords(answer);
-    return commonInOrder(heard, expected) >= Math.ceil(expected.length * 0.75);
-  });
-  return { correct, solution: sentence.en, note: transcript ? `Duyduğum: “${transcript}”` : undefined };
+    const score = commonInOrder(heard, expected) / Math.max(expected.length, 1);
+    if (score > best.score) best = { score, missing: expected.filter((word) => !heard.includes(word)) };
+  }
+  const notes = [
+    transcript && `Duyduğum: “${transcript}”`,
+    best.missing.length > 0 && `Tam duyamadıklarım: ${best.missing.join(', ')}`,
+  ].filter(Boolean);
+  return { correct: best.score >= 0.75, solution: sentence.en, note: notes.join(' · ') || undefined };
+}
+
+function gradeSaidWord(transcript: string, word: Word): Grade {
+  const heard = ` ${spokenWords(transcript).join(' ')} `;
+  const target = normalize(word.en, 'en');
+  const close = target.length >= 4 && heard.split(' ').some((w) => w && levenshtein(w, target) <= 1);
+  return {
+    correct: heard.includes(` ${target} `) || close,
+    solution: word.en,
+    note: transcript ? `Duyduğum: “${transcript}”` : undefined,
+  };
 }
 
 /** Index of the right option for the multiple choice exercises */
 export function answerIndex(exercise: Exercise) {
   switch (exercise.kind) {
     case 'picture':
+    case 'hear':
       return exercise.options.indexOf(exercise.word);
     case 'select':
       return exercise.options.indexOf(exercise.word.tr);
     case 'blank':
       return exercise.options.indexOf(exercise.blank.answer);
+    case 'pair':
+      return exercise.said;
     default:
       return -1;
   }
@@ -220,6 +196,7 @@ export function canCheck(exercise: Exercise, draft: Draft) {
       return draft.picked.length > 0;
     case 'type':
     case 'speak':
+    case 'say':
       return draft.text.trim() !== '';
     case 'match':
       return false;
@@ -233,10 +210,22 @@ export function grade(exercise: Exercise, draft: Draft): Grade {
   switch (exercise.kind) {
     case 'picture':
       return { correct: correctChoice, solution: exercise.word.en };
+    case 'hear':
+      return { correct: correctChoice, solution: exercise.word.en, meaning: exercise.word.tr };
     case 'select':
       return { correct: correctChoice, solution: exercise.word.tr };
+    case 'pair':
+      return {
+        correct: correctChoice,
+        solution: exercise.pair.words[exercise.said].en,
+        why: correctChoice ? undefined : exercise.pair.why,
+      };
     case 'blank':
-      return { correct: correctChoice, solution: exercise.blank.en.replace('___', exercise.blank.answer) };
+      return {
+        correct: correctChoice,
+        solution: exercise.blank.en.replace('___', exercise.blank.answer),
+        why: correctChoice ? undefined : explainBlank(exercise.blank),
+      };
     case 'build': {
       const built = draft.picked.map((i) => exercise.tiles[i]).join(' ');
       return gradeSentence(built, exercise.sentence, exercise.from === 'tr' ? 'en' : 'tr', false);
@@ -249,13 +238,15 @@ export function grade(exercise: Exercise, draft: Draft): Grade {
       return gradeSentence(draft.text, exercise.sentence, 'en', true);
     case 'speak':
       return gradeSpeech(draft.text, exercise.sentence);
+    case 'say':
+      return gradeSaidWord(draft.text, exercise.word);
     case 'match':
       return { correct: true, solution: '' };
   }
 }
 
-/** The English and Turkish of a saved mistake, for the parents' summary */
-export function mistakeText(key: string): { en: string; tr: string } | null {
+/** The English and Turkish of a saved item, for the parents' summary and the word book */
+export function itemText(key: string): { en: string; tr: string } | null {
   for (const lesson of units.flatMap((unit) => unit.lessons)) {
     const word = lesson.words.find((w) => key === `w:${w.en}`);
     if (word) return word;
@@ -267,15 +258,19 @@ export function mistakeText(key: string): { en: string; tr: string } | null {
   return null;
 }
 
-/** Identifies the word, sentence or blank an exercise practises, for the list of mistakes */
+/** Identifies the word, sentence or blank an exercise practises, for spaced repetition and mistakes */
 export function itemKey(exercise: Exercise) {
+  if (exercise.generated) return null;
   switch (exercise.kind) {
     case 'picture':
+    case 'hear':
     case 'select':
+    case 'say':
       return `w:${exercise.word.en}`;
     case 'blank':
       return `b:${exercise.blank.en}`;
     case 'match':
+    case 'pair':
       return null;
     default:
       return `s:${exercise.sentence.en}`;
@@ -284,8 +279,8 @@ export function itemKey(exercise: Exercise) {
 
 let nextId = 0;
 
-function make(body: ExerciseBody): Exercise {
-  return { ...body, id: nextId++, attempt: 0 };
+function make(body: ExerciseBody, generated = false): Exercise {
+  return { ...body, id: nextId++, attempt: 0, ...(generated ? { generated } : {}) };
 }
 
 // Pronouns and articles never become extra tiles: "Ben" added to "Öğrenciyim" or "the" added
@@ -313,14 +308,32 @@ function wordTiles(text: string, lang: Lang, unitIndex: number) {
   return shuffle([...answer, ...sample([...pool.values()], extra)]);
 }
 
-function wordExercise(word: Word, lessonWords: Word[], unitWords: Word[]): Exercise {
+function pictureOptions(word: Word, lessonWords: Word[], unitWords: Word[]) {
   const withPicture = (words: Word[]) => words.filter((w) => w.emoji);
-  if (word.emoji) {
-    const others = pickDistinct(withPicture(lessonWords), withPicture(unitWords), 2, (w) => w.en, word.en);
-    if (others.length === 2) return make({ kind: 'picture', word, options: shuffle([word, ...others]) });
-  }
+  if (!word.emoji) return null;
+  const others = pickDistinct(withPicture(lessonWords), withPicture(unitWords), 2, (w) => w.en, word.en);
+  return others.length === 2 ? shuffle([word, ...others]) : null;
+}
+
+function wordExercise(word: Word, lessonWords: Word[], unitWords: Word[]): Exercise {
+  const options = pictureOptions(word, lessonWords, unitWords);
+  if (options) return make({ kind: 'picture', word, options });
   const others = pickDistinct(lessonWords, unitWords, 3, (w) => w.tr, word.tr);
   return make({ kind: 'select', word, options: shuffle([word.tr, ...others.map((w) => w.tr)]) });
+}
+
+function hearExercise(word: Word, lessonWords: Word[], unitWords: Word[]): Exercise {
+  const options = pictureOptions(word, lessonWords, unitWords);
+  return options ? make({ kind: 'hear', word, options }) : wordExercise(word, lessonWords, unitWords);
+}
+
+/** One word exercise, varied by what the browser can do: hear it, see it, or say it */
+function anyWordExercise(word: Word, lessonWords: Word[], unitWords: Word[], modes: Modes): Exercise {
+  const kinds = ['see', ...(modes.listening ? ['hear'] : []), ...(modes.speaking ? ['say'] : [])];
+  const kind = pickOne(kinds);
+  if (kind === 'hear') return hearExercise(word, lessonWords, unitWords);
+  if (kind === 'say') return make({ kind: 'say', word });
+  return wordExercise(word, lessonWords, unitWords);
 }
 
 function matchExercise(words: Word[]): Exercise {
@@ -328,12 +341,16 @@ function matchExercise(words: Word[]): Exercise {
   return make({ kind: 'match', pairs, rightOrder: shuffle(pairs.map((_, i) => i)) });
 }
 
+function pairExercise(): Exercise {
+  return make({ kind: 'pair', pair: pickOne(SOUND_PAIRS), said: Math.floor(Math.random() * 2) });
+}
+
 type SentenceKind = 'build-en' | 'build-tr' | 'listen' | 'type' | 'speak';
 const ROTATION: SentenceKind[] = ['build-en', 'listen', 'build-tr', 'type', 'speak'];
 const MAX_TYPED_WORDS = 4;
 
 // Five sentences get one of each kind; a shorter list starts the rotation at a random kind
-function sentenceExercises(sentences: Sentence[], unitIndex: number, modes: Modes) {
+function sentenceExercises(sentences: Sentence[], unitIndex: number, modes: Modes, generated = false) {
   const offset = Math.floor(Math.random() * ROTATION.length);
   const kinds = shuffle(sentences.map((_, i) => ROTATION[(i + offset) % ROTATION.length]));
   return sentences.map((sentence, i) => {
@@ -345,48 +362,65 @@ function sentenceExercises(sentences: Sentence[], unitIndex: number, modes: Mode
         : kinds[i];
     switch (kind) {
       case 'build-en':
-        return make({ kind: 'build', from: 'tr', sentence, tiles: wordTiles(sentence.en, 'en', unitIndex) });
+        return make({ kind: 'build', from: 'tr', sentence, tiles: wordTiles(sentence.en, 'en', unitIndex) }, generated);
       case 'build-tr':
-        return make({ kind: 'build', from: 'en', sentence, tiles: wordTiles(sentence.tr, 'tr', unitIndex) });
+        return make({ kind: 'build', from: 'en', sentence, tiles: wordTiles(sentence.tr, 'tr', unitIndex) }, generated);
       case 'listen':
-        return make({ kind: 'listen', sentence, tiles: wordTiles(sentence.en, 'en', unitIndex) });
+        return make({ kind: 'listen', sentence, tiles: wordTiles(sentence.en, 'en', unitIndex) }, generated);
       case 'speak':
-        return make({ kind: 'speak', sentence, tiles: wordTiles(sentence.en, 'en', unitIndex) });
+        return make({ kind: 'speak', sentence, tiles: wordTiles(sentence.en, 'en', unitIndex) }, generated);
       case 'type':
-        return make({ kind: 'type', sentence });
+        return make({ kind: 'type', sentence }, generated);
     }
   });
+}
+
+/** A sentence built from a pattern with known words, as tiles in either direction */
+function patternExercise(unitIndex: number): Exercise | null {
+  const sentence = patternSentence(unitIndex);
+  if (!sentence) return null;
+  const from: Lang = Math.random() < 0.5 ? 'tr' : 'en';
+  const lang: Lang = from === 'tr' ? 'en' : 'tr';
+  return make({ kind: 'build', from, sentence, tiles: wordTiles(sentence[lang], lang, unitIndex) }, true);
 }
 
 function blankExercise(blank: Blank): Exercise {
   return make({ kind: 'blank', blank, options: shuffle(blank.options) });
 }
 
-// A lesson introduces its first words, matches them, then mixes sentences and blanks
+// A lesson asks about its first words (just shown on the teaching cards), matches them, then mixes
+// sentences, two blanks and one extra: a pattern sentence or a sound pair
 function lessonExercises(lesson: Lesson, unitIndex: number, modes: Modes) {
   const unitWords = units[unitIndex].lessons.flatMap((l) => l.words);
+  const [first, second, third] = lesson.words;
+  const pattern = patternExercise(unitIndex);
+  const extras = [...(pattern ? [pattern] : []), ...(modes.listening ? [pairExercise()] : [])];
   return [
-    ...lesson.words.slice(0, 3).map((word) => wordExercise(word, lesson.words, unitWords)),
+    modes.listening ? hearExercise(first, lesson.words, unitWords) : wordExercise(first, lesson.words, unitWords),
+    wordExercise(second, lesson.words, unitWords),
+    modes.speaking ? make({ kind: 'say', word: third }) : wordExercise(third, lesson.words, unitWords),
     matchExercise(lesson.words),
-    ...shuffle([...sentenceExercises(lesson.sentences, unitIndex, modes), ...lesson.blanks.map(blankExercise)]),
+    ...shuffle([
+      ...sentenceExercises(lesson.sentences, unitIndex, modes),
+      ...sample(lesson.blanks, 2).map(blankExercise),
+      ...sample(extras, 1),
+    ]),
   ];
 }
 
-/** A review over several lessons: unit reviews and the practice session */
+/** A review over several lessons: unit chests, practice and jump tests */
 export function mixedExercises(lessons: Lesson[], unitIndex: number, modes: Modes) {
   const words = lessons.flatMap((lesson) => lesson.words);
-  const sentences = sample(
-    lessons.flatMap((lesson) => lesson.sentences),
-    6,
-  );
-  const blanks = sample(
-    lessons.flatMap((lesson) => lesson.blanks),
-    3,
-  );
+  const pattern = patternExercise(unitIndex);
   return [
-    ...sample(words, 2).map((word) => wordExercise(word, words, words)),
+    ...sample(words, 2).map((word) => anyWordExercise(word, words, words, modes)),
     matchExercise(words),
-    ...shuffle([...sentenceExercises(sentences, unitIndex, modes), ...blanks.map(blankExercise)]),
+    ...shuffle([
+      ...sentenceExercises(sample(lessons.flatMap((lesson) => lesson.sentences), 5), unitIndex, modes),
+      ...sample(lessons.flatMap((lesson) => lesson.blanks), 3).map(blankExercise),
+      ...(pattern ? [pattern] : []),
+      ...(modes.listening ? [pairExercise()] : []),
+    ]),
   ];
 }
 
@@ -406,37 +440,48 @@ export function practiceExercises(finished: PathNode[], modes: Modes) {
   );
 }
 
-/** The ten most recent mistakes, each as a fresh exercise */
-export function mistakeExercises(keys: string[], modes: Modes) {
-  const recent = new Set(keys.slice(-10));
+/** Fresh exercises for the given items (spaced review, mistakes); unknown keys are skipped */
+export function itemExercises(keys: string[], modes: Modes) {
+  const wanted = new Set(keys);
   return shuffle(
     units.flatMap((unit, unitIndex) => {
       const unitWords = unit.lessons.flatMap((lesson) => lesson.words);
       return unit.lessons.flatMap((lesson) => [
-        ...lesson.words.filter((w) => recent.has(`w:${w.en}`)).map((w) => wordExercise(w, lesson.words, unitWords)),
+        ...lesson.words
+          .filter((w) => wanted.has(`w:${w.en}`))
+          .map((w) => anyWordExercise(w, lesson.words, unitWords, modes)),
         ...sentenceExercises(
-          lesson.sentences.filter((s) => recent.has(`s:${s.en}`)),
+          lesson.sentences.filter((s) => wanted.has(`s:${s.en}`)),
           unitIndex,
           modes,
         ),
-        ...lesson.blanks.filter((b) => recent.has(`b:${b.en}`)).map(blankExercise),
+        ...lesson.blanks.filter((b) => wanted.has(`b:${b.en}`)).map(blankExercise),
       ]);
     }),
   );
 }
 
-/** Listening or speaking turned off mid-lesson: those exercises become English word-tile builds */
-export function withoutKind(queue: Exercise[], kind: 'listen' | 'speak'): Exercise[] {
-  return queue.map((exercise) =>
-    (exercise.kind === 'listen' || exercise.kind === 'speak') && exercise.kind === kind
-      ? {
-          kind: 'build',
-          from: 'tr',
-          sentence: exercise.sentence,
-          tiles: exercise.tiles,
-          id: exercise.id,
-          attempt: exercise.attempt + 1,
-        }
-      : exercise,
-  );
+/** The test for skipping ahead to a unit: a mixed review of everything before it, without speaking */
+export function jumpTestExercises(unitIndex: number, modes: Modes) {
+  const lessons = units.slice(0, unitIndex).flatMap((unit) => unit.lessons);
+  return mixedExercises(lessons, unitIndex - 1, { ...modes, speaking: false });
+}
+
+/**
+ * Listening or speaking turned off mid-lesson: sentence exercises become English word-tile builds and
+ * a heard word becomes a labelled picture choice; sound pairs and spoken words are dropped.
+ */
+export function withoutSpeech(queue: Exercise[], feature: 'listening' | 'speaking'): Exercise[] {
+  return queue.flatMap((exercise): Exercise[] => {
+    const next = { id: exercise.id, attempt: exercise.attempt + 1, generated: exercise.generated };
+    if (feature === 'listening') {
+      if (exercise.kind === 'listen') return [{ ...next, kind: 'build', from: 'tr', sentence: exercise.sentence, tiles: exercise.tiles }];
+      if (exercise.kind === 'hear') return [{ ...next, kind: 'picture', word: exercise.word, options: exercise.options }];
+      if (exercise.kind === 'pair') return [];
+    } else {
+      if (exercise.kind === 'speak') return [{ ...next, kind: 'build', from: 'tr', sentence: exercise.sentence, tiles: exercise.tiles }];
+      if (exercise.kind === 'say') return [];
+    }
+    return [exercise];
+  });
 }

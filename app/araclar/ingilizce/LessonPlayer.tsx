@@ -1,22 +1,25 @@
 'use client';
 
-import { useEffect, useState, type CSSProperties } from 'react';
-import { Clock, EarOff, Flame, MicOff, Target, X, type LucideIcon } from 'lucide-react';
-import { percentFormat } from '../shared';
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
+import { EarOff, Flame, Lightbulb, MicOff, X } from 'lucide-react';
 import { playSound, speakAuto, stopSpeaking } from './audio';
+import type { Tip, Word } from './course';
 import { ExerciseView } from './ExerciseViews';
-import { canCheck, grade, itemKey, withoutKind, type Draft, type Exercise, type Grade } from './exercises';
+import { canCheck, grade, itemKey, withoutSpeech, type Draft, type Exercise, type Grade } from './exercises';
 import styles from './ingilizce.module.css';
 import { Mascot, type Mood } from './Mascot';
-import { clearMistake, noteMistake, type SessionReward } from './progress';
-import type { SessionFacts, Sticker } from './stickers';
-import { AMBER, GREEN, MUTED, ORANGE, PressButton, RED, Stars, WeekRow } from './ui';
+import { recordAnswer, type SessionReward } from './progress';
+import { makeConfetti, SessionEnd, type SessionOutcome } from './SessionEnd';
+import type { SessionFacts } from './stickers';
+import { TeachScreen } from './TeachScreen';
+import { AMBER, GREEN, MUTED, PressButton, RED } from './ui';
 
 /** Right answers in a row before the combo counter shows */
 const COMBO_FROM = 3;
+/** Mistakes a jump test allows */
+const TEST_MISTAKES = 2;
 const PRAISE = ['Harika', 'Süper', 'Mükemmel', 'Aferin', 'Çok iyi', 'Bravo'];
 const CHEERS = ['Az kaldı!', 'Sorun değil!', 'Neredeyse!'];
-const CONFETTI_COLORS = ['#1cb0f6', '#58cc02', '#ff9600', '#ff4b4b', '#a560e8', '#ffc531', '#e85d9e'];
 const EMPTY_DRAFT: Draft = { choice: null, picked: [], text: '' };
 
 export type LessonSession = {
@@ -26,19 +29,16 @@ export type LessonSession = {
   title: string;
   exercises: Exercise[];
   startedAt: number;
+  /** New words (and the unit's rule) shown on cards before the first question */
+  teach?: { words: Word[]; tip?: Tip };
+  /** For a jump test: the unit it opens */
+  test?: { unitTitle: string };
 };
 
-export type SessionResult = { stars: number; spoke: boolean };
+export type SessionResult = { stars: number; spoke: boolean; passed: boolean };
 
 /** `advance` is false for a mistake, which sends the exercise to the back of the queue */
 type Feedback = Grade & { title: string; advance: boolean };
-
-type ConfettiPiece = { x: number; delay: number; time: number; drift: number; turn: number; color: string };
-
-type Result = { stars: number; accuracy: number; seconds: number; reward: SessionReward; confetti: ConfettiPiece[] };
-
-/** After the result come one screen per new sticker, then the streak on the first session of the day */
-type Screen = { kind: 'result' } | { kind: 'sticker'; sticker: Sticker } | { kind: 'streak' };
 
 function pick<T>(items: T[]) {
   return items[Math.floor(Math.random() * items.length)];
@@ -47,21 +47,6 @@ function pick<T>(items: T[]) {
 // Mistakes never end a lesson; they only cost stars
 function starsFor(mistakes: number) {
   return mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
-}
-
-function makeConfetti(): ConfettiPiece[] {
-  return Array.from({ length: 70 }, (_, i) => ({
-    x: Math.random() * 100,
-    delay: Math.random() * 0.5,
-    time: 2.2 + Math.random() * 1.6,
-    drift: (Math.random() - 0.5) * 160,
-    turn: 360 + Math.random() * 720,
-    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-  }));
-}
-
-function formatDuration(seconds: number) {
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
 
 // After a right answer the English sentence is read out, as a model to repeat
@@ -78,6 +63,24 @@ function englishAnswer(exercise: Exercise) {
   }
 }
 
+// What the page reads out when an exercise appears
+function promptAudio(exercise: Exercise | undefined) {
+  switch (exercise?.kind) {
+    case 'listen':
+    case 'speak':
+      return exercise.sentence.en;
+    case 'select':
+    case 'hear':
+      return exercise.word.en;
+    case 'pair':
+      return exercise.pair.words[exercise.said].en;
+    case 'build':
+      return exercise.from === 'en' ? exercise.sentence.en : null;
+    default:
+      return null;
+  }
+}
+
 export function LessonPlayer({
   session,
   learnerName,
@@ -89,6 +92,7 @@ export function LessonPlayer({
   onFinish: (result: SessionResult) => SessionReward;
   onClose: () => void;
 }) {
+  const [teaching, setTeaching] = useState(Boolean(session.teach));
   const [queue, setQueue] = useState(session.exercises);
   const [solved, setSolved] = useState(0);
   const [mistakes, setMistakes] = useState(0);
@@ -96,29 +100,30 @@ export function LessonPlayer({
   const [spoke, setSpoke] = useState(false);
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
-  const [result, setResult] = useState<Result | null>(null);
-  const [screens, setScreens] = useState<Screen[]>([]);
+  const [outcome, setOutcome] = useState<SessionOutcome | null>(null);
   const [confirmingExit, setConfirmingExit] = useState(false);
+  // The model answer is read out a moment after a right answer; moving on cancels it so it never
+  // talks over the next exercise's own audio
+  const modelTimer = useRef<number | undefined>(undefined);
 
   const total = session.exercises.length;
   const current = queue[0];
   const ready = current !== undefined && !feedback && canCheck(current, draft);
-  const screen = screens[0];
 
   useEffect(() => {
     const { overflow } = document.body.style;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = overflow;
+      window.clearTimeout(modelTimer.current);
       stopSpeaking();
     };
   }, []);
 
   useEffect(() => {
-    if (current?.kind === 'listen' || current?.kind === 'speak') speakAuto(current.sentence.en);
-    else if (current?.kind === 'select') speakAuto(current.word.en);
-    else if (current?.kind === 'build' && current.from === 'en') speakAuto(current.sentence.en);
-  }, [current]);
+    const audio = teaching ? null : promptAudio(current);
+    if (audio) speakAuto(audio);
+  }, [current, teaching]);
 
   function praise() {
     return learnerName ? `${pick(PRAISE)}, ${learnerName}!` : `${pick(PRAISE)}!`;
@@ -127,36 +132,37 @@ export function LessonPlayer({
   function choose(index: number) {
     if (!current || feedback) return;
     setDraft((previous) => ({ ...previous, choice: index }));
-    if (current.kind === 'picture') speakAuto(current.options[index].en);
+    if (current.kind === 'picture' || current.kind === 'pair') {
+      speakAuto(current.kind === 'picture' ? current.options[index].en : current.pair.words[index].en);
+    }
   }
 
   function check(answer: Draft = draft) {
     if (!current || feedback || !canCheck(current, answer)) return;
     const graded = grade(current, answer);
     const key = itemKey(current);
-    // Speech recognition errors are not the learner's: a missed speaking exercise costs nothing
-    const forgiven = !graded.correct && current.kind === 'speak';
+    // Recognition errors are not the learner's: a missed speaking exercise costs nothing
+    const spoken = current.kind === 'speak' || current.kind === 'say';
+    const forgiven = !graded.correct && spoken;
+    // Only the first try counts for memory; a retried item stays where the mistake put it
+    if (key && current.attempt === 0 && !forgiven) recordAnswer(key, graded.correct);
     if (graded.correct) {
       setSolved(solved + 1);
       setCombo(combo + 1);
       playSound('correct');
-      if (current.kind === 'speak') setSpoke(true);
-      if (key && current.attempt === 0) clearMistake(key);
-      const spoken = englishAnswer(current);
-      if (spoken) window.setTimeout(() => speakAuto(spoken), 350);
-    } else if (forgiven) {
-      setSolved(solved + 1);
-      setCombo(0);
-      playSound('wrong');
+      if (spoken) setSpoke(true);
+      const model = englishAnswer(current);
+      if (model) modelTimer.current = window.setTimeout(() => speakAuto(model), 350);
     } else {
-      setMistakes(mistakes + 1);
+      if (forgiven || session.test) setSolved(solved + 1);
+      if (!forgiven) setMistakes(mistakes + 1);
       setCombo(0);
       playSound('wrong');
-      if (key) noteMistake(key);
     }
     setFeedback({
       ...graded,
-      advance: graded.correct || forgiven,
+      // A jump test moves on after a mistake; it measures, it does not drill
+      advance: graded.correct || forgiven || Boolean(session.test),
       title: graded.correct ? praise() : forgiven ? 'Tam anlayamadım' : `${pick(CHEERS)} Doğrusu:`,
     });
   }
@@ -176,25 +182,24 @@ export function LessonPlayer({
 
   function finish() {
     const stars = starsFor(mistakes);
-    const reward = onFinish({ stars, spoke });
-    playSound('complete');
-    setResult({
+    const passed = mistakes <= TEST_MISTAKES;
+    const reward = onFinish({ stars, spoke, passed });
+    playSound(session.test && !passed ? 'wrong' : 'complete');
+    setOutcome({
       stars,
       reward,
       confetti: makeConfetti(),
-      accuracy: total / (total + mistakes),
+      // In a test every question is asked once; in a lesson missed ones come again
+      accuracy: session.test ? (total - mistakes) / total : total / (total + mistakes),
       seconds: Math.round((Date.now() - session.startedAt) / 1000),
+      test: session.test ? { passed, unitTitle: session.test.unitTitle } : undefined,
     });
-    setScreens([
-      { kind: 'result' },
-      ...reward.stickers.map((sticker): Screen => ({ kind: 'sticker', sticker })),
-      ...(reward.streak.extended ? [{ kind: 'streak' } as const] : []),
-    ]);
   }
 
   // A missed exercise goes to the back of the queue and comes again until it is answered right
   function next() {
     if (!current || !feedback) return;
+    window.clearTimeout(modelTimer.current);
     const rest = queue.slice(1);
     setFeedback(null);
     setDraft(EMPTY_DRAFT);
@@ -206,22 +211,17 @@ export function LessonPlayer({
     if (rest.length === 0) finish();
   }
 
-  function nextScreen() {
-    if (screens.length > 1) {
-      setScreens(screens.slice(1));
-      if (screens[1].kind === 'sticker') playSound('complete');
-    } else {
-      onClose();
-    }
-  }
-
-  function skip(kind: 'listen' | 'speak') {
+  // Dropped exercises (sound pairs, spoken words) count as done so the bar still fills up
+  function skip(feature: 'listening' | 'speaking') {
+    const remaining = withoutSpeech(queue, feature);
     setDraft(EMPTY_DRAFT);
-    setQueue(withoutKind(queue, kind));
+    setSolved(solved + queue.length - remaining.length);
+    setQueue(remaining);
+    if (remaining.length === 0) finish();
   }
 
   function requestClose() {
-    if (result || (solved === 0 && mistakes === 0)) onClose();
+    if (outcome || teaching || (solved === 0 && mistakes === 0)) onClose();
     else setConfirmingExit(true);
   }
 
@@ -234,14 +234,8 @@ export function LessonPlayer({
         else requestClose();
         return;
       }
-      if (confirmingExit) return;
-      if (result) {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          nextScreen();
-        }
-        return;
-      }
+      // The teaching cards and the end screens handle their own keys
+      if (confirmingExit || teaching || outcome) return;
       if (event.key === 'Enter') {
         // Also stops a focused tile or option from being pressed by the same key
         event.preventDefault();
@@ -251,9 +245,10 @@ export function LessonPlayer({
       }
       const typing = event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLInputElement;
       if (typing || feedback || !current) return;
-      if (current.kind === 'picture' || current.kind === 'select' || current.kind === 'blank') {
+      if (['picture', 'hear', 'select', 'blank', 'pair'].includes(current.kind)) {
         const index = Number(event.key) - 1;
-        if (Number.isInteger(index) && index >= 0 && index < current.options.length) choose(index);
+        const count = current.kind === 'pair' ? 2 : 'options' in current ? current.options.length : 0;
+        if (Number.isInteger(index) && index >= 0 && index < count) choose(index);
       } else if ((current.kind === 'build' || current.kind === 'listen') && event.key === 'Backspace') {
         setDraft((previous) => ({ ...previous, picked: previous.picked.slice(0, -1) }));
       }
@@ -266,7 +261,7 @@ export function LessonPlayer({
     ? 'border-slate-200 bg-white'
     : feedback.correct
       ? 'border-green-300 bg-green-100'
-      : feedback.advance
+      : feedback.advance && !session.test
         ? 'border-amber-300 bg-amber-100'
         : 'border-rose-300 bg-rose-100';
 
@@ -315,74 +310,10 @@ export function LessonPlayer({
         </span>
       </header>
 
-      {result && screen?.kind === 'result' ? (
-        <OutcomeScreen
-          mascot="cheer"
-          title={result.stars === 3 ? 'Kusursuz ders!' : 'Ders bitti!'}
-          text={
-            result.stars === 3
-              ? `Hiç hata yapmadın${learnerName ? `, ${learnerName}` : ''}! Üç yıldızın hepsi senin.`
-              : 'Kaçırdıkların tekrar karşına çıktı ve hepsini doğru yaptın.'
-          }
-          action={
-            <PressButton face={GREEN} onClick={nextScreen} className="w-full sm:w-auto sm:min-w-48">
-              Devam
-            </PressButton>
-          }
-        >
-          <Confetti pieces={result.confetti} />
-          <div className={`${styles.pop} mt-6`} style={{ animationDelay: '200ms' }}>
-            <Stars count={result.stars} className="size-12 sm:size-14" />
-          </div>
-          <dl className="mt-8 grid w-full max-w-sm grid-cols-2 gap-3">
-            <ResultTile icon={Target} label="Doğruluk" tone="border-green-400 text-green-700">
-              {percentFormat.format(result.accuracy)}
-            </ResultTile>
-            <ResultTile icon={Clock} label="Süre" tone="border-sky-400 text-sky-700">
-              {formatDuration(result.seconds)}
-            </ResultTile>
-          </dl>
-        </OutcomeScreen>
-      ) : result && screen?.kind === 'sticker' ? (
-        <OutcomeScreen
-          mascot="happy"
-          title="Yeni çıkartma!"
-          text={`“${screen.sticker.name}” çıkartması albümüne eklendi.`}
-          action={
-            <PressButton face={GREEN} onClick={nextScreen} className="w-full sm:w-auto sm:min-w-48">
-              Harika!
-            </PressButton>
-          }
-        >
-          <span
-            key={screen.sticker.id}
-            aria-hidden="true"
-            className={`${styles.pop} mt-6 grid size-36 place-items-center rounded-full border-4 border-dashed border-amber-300 bg-amber-50 text-7xl`}
-          >
-            {screen.sticker.emoji}
-          </span>
-        </OutcomeScreen>
-      ) : result && screen?.kind === 'streak' ? (
-        <OutcomeScreen
-          mascot="happy"
-          title={`${result.reward.streak.streak} günlük seri!`}
-          text={
-            result.reward.streak.streak === 1
-              ? 'Serin başladı! Yarın da bir ders yapıp ateşi büyüt.'
-              : 'Her gün biraz pratik, en hızlı öğrenme yolu. Yarın da gel!'
-          }
-          action={
-            <PressButton face={ORANGE} onClick={nextScreen} className="w-full sm:w-auto sm:min-w-48">
-              Devam
-            </PressButton>
-          }
-        >
-          <span className={`${styles.pop} mt-6 inline-flex items-center gap-1 text-6xl font-extrabold text-orange-500`}>
-            <Flame aria-hidden="true" className="size-16 fill-orange-400" />
-            {result.reward.streak.streak}
-          </span>
-          <WeekRow week={result.reward.streak.week} className={`${styles.rise} mt-8 w-full max-w-xs`} />
-        </OutcomeScreen>
+      {outcome ? (
+        <SessionEnd outcome={outcome} learnerName={learnerName} onClose={onClose} />
+      ) : teaching && session.teach ? (
+        <TeachScreen words={session.teach.words} tip={session.teach.tip} onDone={() => setTeaching(false)} />
       ) : (
         <>
           <main className="flex-1 overflow-y-auto">
@@ -413,13 +344,25 @@ export function LessonPlayer({
             >
               {feedback ? (
                 <FeedbackMessage feedback={feedback} />
-              ) : current?.kind === 'listen' || current?.kind === 'speak' ? (
-                <SkipButton kind={current.kind} onSkip={skip} />
+              ) : current && ['listen', 'hear', 'pair'].includes(current.kind) ? (
+                <SkipButton feature="listening" onSkip={skip} />
+              ) : current && ['speak', 'say'].includes(current.kind) ? (
+                <SkipButton feature="speaking" onSkip={skip} />
               ) : (
                 <span className="hidden sm:block" />
               )}
               <PressButton
-                face={feedback ? (feedback.correct ? GREEN : feedback.advance ? AMBER : RED) : ready ? GREEN : MUTED}
+                face={
+                  feedback
+                    ? feedback.correct
+                      ? GREEN
+                      : feedback.advance && !session.test
+                        ? AMBER
+                        : RED
+                    : ready
+                      ? GREEN
+                      : MUTED
+                }
                 disabled={!feedback && !ready}
                 onClick={feedback ? next : () => check()}
                 className="w-full sm:w-auto sm:min-w-48"
@@ -463,18 +406,41 @@ export function LessonPlayer({
   );
 }
 
-function SkipButton({ kind, onSkip }: { kind: 'listen' | 'speak'; onSkip: (kind: 'listen' | 'speak') => void }) {
-  const Icon = kind === 'listen' ? EarOff : MicOff;
+function SkipButton({
+  feature,
+  onSkip,
+}: {
+  feature: 'listening' | 'speaking';
+  onSkip: (feature: 'listening' | 'speaking') => void;
+}) {
+  const Icon = feature === 'listening' ? EarOff : MicOff;
   return (
     <button
       type="button"
-      onClick={() => onSkip(kind)}
+      onClick={() => onSkip(feature)}
       className={`${styles.display} inline-flex h-12 w-fit items-center gap-2 rounded-2xl px-3 text-base font-bold uppercase tracking-wide text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700`}
     >
       <Icon aria-hidden="true" className="size-5" />
-      {kind === 'listen' ? 'Şu an dinleyemiyorum' : 'Şu an konuşamıyorum'}
+      {feature === 'listening' ? 'Şu an dinleyemiyorum' : 'Şu an konuşamıyorum'}
     </button>
   );
+}
+
+/** The solution with the words the answer missed marked, so the child sees where it went wrong */
+function Solution({ text, missed }: { text: string; missed?: boolean[] }): ReactNode {
+  if (!missed?.some(Boolean)) return text;
+  return text.split(/\s+/).map((word, i) => (
+    <Fragment key={i}>
+      {i > 0 && ' '}
+      {missed[i] ? (
+        <mark className="rounded-md bg-white/80 px-1 text-inherit underline decoration-wavy decoration-2 underline-offset-4">
+          {word}
+        </mark>
+      ) : (
+        word
+      )}
+    </Fragment>
+  ));
 }
 
 function FeedbackMessage({ feedback }: { feedback: Feedback }) {
@@ -486,88 +452,20 @@ function FeedbackMessage({ feedback }: { feedback: Feedback }) {
       <Mascot mood={mood} className="h-20 w-[4.3rem] shrink-0 sm:h-24 sm:w-20" />
       <div className={`min-w-0 ${text}`}>
         <p className={`${styles.display} text-2xl font-bold`}>{feedback.title}</p>
-        {!correct && <p className="text-lg font-semibold">{feedback.solution}</p>}
+        {!correct && (
+          <p className="text-lg font-semibold">
+            <Solution text={feedback.solution} missed={feedback.missed} />
+          </p>
+        )}
+        {feedback.why && (
+          <p className="mt-1 flex items-start gap-1.5 text-sm font-semibold">
+            <Lightbulb aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+            {feedback.why}
+          </p>
+        )}
         {feedback.note && <p className="mt-0.5 text-sm font-semibold opacity-90">{feedback.note}</p>}
         {feedback.meaning && <p className="mt-0.5 text-sm font-semibold opacity-90">Anlamı: {feedback.meaning}</p>}
       </div>
-    </div>
-  );
-}
-
-function OutcomeScreen({
-  mascot,
-  title,
-  text,
-  action,
-  children,
-}: {
-  mascot: Mood;
-  title: string;
-  text: string;
-  action: React.ReactNode;
-  children?: React.ReactNode;
-}) {
-  return (
-    <>
-      {/* m-auto rather than justify-center, so a tall screen on a short window still scrolls to its top */}
-      <main className="flex flex-1 flex-col overflow-y-auto px-4 py-8">
-        <div className={`${styles.rise} m-auto flex w-full flex-col items-center text-center`}>
-          <Mascot mood={mascot} className="h-36 w-32 sm:h-44 sm:w-40" />
-          <h2 className={`${styles.display} mt-4 text-4xl font-bold text-slate-800`}>{title}</h2>
-          <p className="mt-2 max-w-sm text-lg leading-relaxed text-slate-600">{text}</p>
-          {children}
-        </div>
-      </main>
-      <footer className="border-t-2 border-slate-200 bg-white">
-        <div className="mx-auto flex w-full max-w-3xl px-4 py-4 sm:min-h-32 sm:items-center sm:justify-end sm:px-6">
-          {action}
-        </div>
-      </footer>
-    </>
-  );
-}
-
-function Confetti({ pieces }: { pieces: ConfettiPiece[] }) {
-  return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 overflow-hidden">
-      {pieces.map((piece, i) => (
-        <span
-          key={i}
-          className={styles.confetti}
-          style={
-            {
-              '--x': `${piece.x}%`,
-              '--delay': `${piece.delay}s`,
-              '--time': `${piece.time}s`,
-              '--drift': `${piece.drift}px`,
-              '--turn': `${piece.turn}deg`,
-              '--color': piece.color,
-            } as CSSProperties
-          }
-        />
-      ))}
-    </div>
-  );
-}
-
-function ResultTile({
-  icon: Icon,
-  label,
-  tone,
-  children,
-}: {
-  icon: LucideIcon;
-  label: string;
-  tone: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={`${styles.rise} overflow-hidden rounded-2xl border-2 border-b-4 bg-white ${tone}`}>
-      <dt className="flex items-center justify-center gap-1.5 bg-current/10 py-1.5 text-sm font-extrabold uppercase tracking-wide">
-        <Icon aria-hidden="true" className="size-4" />
-        {label}
-      </dt>
-      <dd className={`${styles.display} py-3 text-3xl font-bold tabular-nums text-slate-800`}>{children}</dd>
     </div>
   );
 }

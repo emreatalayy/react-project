@@ -24,6 +24,12 @@ function titleOf(exercise: Exercise) {
   switch (exercise.kind) {
     case 'picture':
       return `“${exercise.word.tr}” hangisi?`;
+    case 'hear':
+      return 'Dinle ve doğru resmi seç';
+    case 'say':
+      return 'Bu ne? İngilizce söyle';
+    case 'pair':
+      return 'Hangisini duydun?';
     case 'select':
       return 'Doğru anlamı seç';
     case 'match':
@@ -133,27 +139,89 @@ function ExerciseBody({ exercise, draft, graded, onChoose, onPick, onUnpick, onT
     case 'listen':
       return (
         <>
-          <div className="flex items-end justify-center gap-4">
-            <PressButton
-              face={BLUE}
-              depth={6}
-              sized={false}
-              aria-label="Cümleyi dinle"
-              className="size-24 rounded-3xl"
-              onClick={() => speak(exercise.sentence.en)}
-            >
-              <SpeakIcon />
-            </PressButton>
-            <SpeakButton text={exercise.sentence.en} slow className="size-14 border-2 border-b-4 border-slate-200 bg-white" />
-          </div>
+          <ListenButtons text={exercise.sentence.en} />
           <div className="mt-8">
             <TileBoard tiles={exercise.tiles} picked={draft.picked} locked={locked} onPick={onPick} onUnpick={onUnpick} />
           </div>
         </>
       );
 
+    case 'hear':
+      return (
+        <>
+          <ListenButtons text={exercise.word.en} />
+          <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4">
+            {exercise.options.map((word, index) => (
+              <button
+                key={word.en}
+                type="button"
+                disabled={locked}
+                onClick={() => onChoose(index)}
+                aria-label={locked ? word.en : `Resim ${index + 1}`}
+                className={`relative flex flex-col items-center gap-3 rounded-3xl border-2 border-b-[6px] px-2 pb-4 pt-7 transition-colors sm:pt-9 ${optionTones[optionTone(index, draft, exercise, graded)]}`}
+              >
+                <span aria-hidden="true" className="text-6xl leading-none sm:text-7xl">
+                  {word.emoji}
+                </span>
+                {/* The word shows only after checking, so the choice is made by ear */}
+                <span lang="en" className={`text-lg font-bold ${locked ? '' : 'invisible'}`}>
+                  {word.en}
+                </span>
+                <span className="absolute right-2 top-2">
+                  <Key>{index + 1}</Key>
+                </span>
+              </button>
+            ))}
+          </div>
+        </>
+      );
+
+    case 'pair':
+      return (
+        <>
+          <ListenButtons text={exercise.pair.words[exercise.said].en} />
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4">
+            {exercise.pair.words.map((word, index) => (
+              <button
+                key={word.en}
+                type="button"
+                disabled={locked}
+                onClick={() => onChoose(index)}
+                className={`relative flex flex-col items-center gap-3 rounded-3xl border-2 border-b-[6px] px-2 pb-5 pt-8 transition-colors ${optionTones[optionTone(index, draft, exercise, graded)]}`}
+              >
+                <span aria-hidden="true" className="text-7xl leading-none">
+                  {word.emoji}
+                </span>
+                <span lang="en" className={`${styles.display} text-2xl font-bold`}>
+                  {word.en}
+                </span>
+                <span className="absolute right-2 top-2">
+                  <Key>{index + 1}</Key>
+                </span>
+              </button>
+            ))}
+          </div>
+        </>
+      );
+
+    case 'say':
+      return (
+        <div className="flex flex-col items-center text-center">
+          <span aria-hidden="true" className="grid size-40 place-items-center rounded-full bg-white text-8xl shadow-sm">
+            {exercise.word.emoji ?? '💬'}
+          </span>
+          <p className="mt-3 text-xl font-bold text-slate-500">{exercise.word.tr}</p>
+          <MicButton locked={locked} onSpoken={onSpoken} idle="Mikrofona dokun ve İngilizcesini söyle" />
+        </div>
+      );
+
     case 'speak':
-      return <SpeakAloud text={exercise.sentence.en} locked={locked} onSpoken={onSpoken} />;
+      return (
+        <>
+          <Prompt lang="en" text={exercise.sentence.en} />
+          <MicButton locked={locked} onSpoken={onSpoken} idle="Mikrofona dokun ve cümleyi söyle" />
+        </>
+      );
 
     case 'type':
       return (
@@ -179,6 +247,24 @@ function ExerciseBody({ exercise, draft, graded, onChoose, onPick, onUnpick, onT
         </>
       );
   }
+}
+
+function ListenButtons({ text }: { text: string }) {
+  return (
+    <div className="flex items-end justify-center gap-4">
+      <PressButton
+        face={BLUE}
+        depth={6}
+        sized={false}
+        aria-label="Dinle"
+        className="size-24 rounded-3xl"
+        onClick={() => speak(text)}
+      >
+        <SpeakIcon />
+      </PressButton>
+      <SpeakButton text={text} slow className="size-14 border-2 border-b-4 border-slate-200 bg-white" />
+    </div>
+  );
 }
 
 // Speaker drawn larger than the icon set's, for the big listen button
@@ -220,7 +306,16 @@ const RECOGNITION_ERRORS: Record<string, string> = {
   network: 'Konuşma tanıma hizmetine ulaşılamadı.',
 };
 
-function SpeakAloud({ text, locked, onSpoken }: { text: string; locked: boolean; onSpoken: (transcript: string) => void }) {
+function MicButton({
+  locked,
+  onSpoken,
+  idle,
+}: {
+  locked: boolean;
+  onSpoken: (transcript: string) => void;
+  /** What to show before the child starts speaking */
+  idle: string;
+}) {
   const [listening, setListening] = useState(false);
   const [heard, setHeard] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -277,37 +372,34 @@ function SpeakAloud({ text, locked, onSpoken }: { text: string; locked: boolean;
   }
 
   return (
-    <>
-      <Prompt lang="en" text={text} />
-      <div className="mt-6 flex flex-col items-center gap-4 text-center">
-        <div className="relative">
-          {listening && (
-            <span aria-hidden="true" className={`${styles.ring} absolute inset-0 rounded-3xl`} style={{ boxShadow: `0 0 0 4px ${RED}` }} />
+    <div className="mt-6 flex flex-col items-center gap-4 text-center">
+      <div className="relative">
+        {listening && (
+          <span aria-hidden="true" className={`${styles.ring} absolute inset-0 rounded-3xl`} style={{ boxShadow: `0 0 0 4px ${RED}` }} />
+        )}
+        <PressButton
+          face={listening ? RED : BLUE}
+          depth={6}
+          sized={false}
+          disabled={locked}
+          onClick={toggle}
+          aria-label={listening ? 'Konuşmayı bitir' : 'Konuşmaya başla'}
+          className="relative size-24 rounded-3xl"
+        >
+          {listening ? (
+            <Square aria-hidden="true" className="size-8 fill-current" />
+          ) : (
+            <Mic aria-hidden="true" className="size-10" />
           )}
-          <PressButton
-            face={listening ? RED : BLUE}
-            depth={6}
-            sized={false}
-            disabled={locked}
-            onClick={toggle}
-            aria-label={listening ? 'Konuşmayı bitir' : 'Konuşmaya başla'}
-            className="relative size-24 rounded-3xl"
-          >
-            {listening ? (
-              <Square aria-hidden="true" className="size-8 fill-current" />
-            ) : (
-              <Mic aria-hidden="true" className="size-10" />
-            )}
-          </PressButton>
-        </div>
-        <p aria-live="polite" className={`min-h-6 text-lg font-semibold ${error ? 'text-rose-600' : 'text-slate-600'}`}>
-          {error ?? (heard ? `“${heard}”` : listening ? 'Dinliyorum, cümleyi söyle…' : 'Mikrofona dokun ve cümleyi söyle')}
-        </p>
-        <p className="max-w-xs text-xs leading-relaxed text-slate-500">
-          Sesin, tarayıcının konuşma tanıma hizmetiyle yazıya çevrilir.
-        </p>
+        </PressButton>
       </div>
-    </>
+      <p aria-live="polite" className={`min-h-6 text-lg font-semibold ${error ? 'text-rose-600' : 'text-slate-600'}`}>
+        {error ?? (heard ? `“${heard}”` : listening ? 'Dinliyorum…' : idle)}
+      </p>
+      <p className="max-w-xs text-xs leading-relaxed text-slate-500">
+        Sesin, tarayıcının konuşma tanıma hizmetiyle yazıya çevrilir.
+      </p>
+    </div>
   );
 }
 
