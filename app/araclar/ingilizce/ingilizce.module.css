@@ -1,0 +1,223 @@
+/* The course is its own bright, rounded world inside the darker site */
+.kid {
+  font-family: var(--font-kid), ui-rounded, system-ui, sans-serif;
+  color: #1e293b;
+}
+.display {
+  font-family: var(--font-kid-display), var(--font-kid), ui-rounded, system-ui, sans-serif;
+}
+
+/* Sky behind the course page, covering the site wallpaper; soft clouds drift slowly */
+.sky {
+  background:
+    radial-gradient(60% 40% at 50% 0%, rgba(255, 255, 255, 0.7), transparent 70%),
+    linear-gradient(180deg, #9fdcff 0%, #cdeeff 38%, #eaf7ff 70%, #fff7e6 100%);
+}
+.cloud {
+  position: absolute;
+  border-radius: 999px;
+  background: #fff;
+  opacity: 0.85;
+  filter: blur(1px);
+}
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  background: inherit;
+}
+.cloud::before {
+  width: 55%;
+  height: 160%;
+  left: 14%;
+  bottom: 20%;
+}
+.cloud::after {
+  width: 40%;
+  height: 130%;
+  right: 12%;
+  bottom: 25%;
+}
+
+/* Chunky buttons: a darker edge under the face that sinks in on press */
+.press {
+  --edge: color-mix(in srgb, var(--face) 70%, #000);
+  background: var(--face);
+  box-shadow: 0 var(--depth, 5px) 0 0 var(--edge);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease,
+    filter 0.2s ease;
+}
+.press:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+.press:active:not(:disabled) {
+  transform: translateY(calc(var(--depth, 5px) - 1px));
+  box-shadow: 0 1px 0 0 var(--edge);
+}
+.press:disabled {
+  cursor: not-allowed;
+}
+
+/* Ruled answer area: one line under each row of word tiles (tiles are 3rem tall, rows 3.75rem apart) */
+.lines {
+  background-image: linear-gradient(
+    to bottom,
+    transparent calc(3.75rem - 2px),
+    #e2e8f0 calc(3.75rem - 2px),
+    #e2e8f0 3.75rem
+  );
+  background-size: 100% 3.75rem;
+}
+
+@keyframes float {
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-10px) rotate(-3deg);
+  }
+  60% {
+    transform: translateY(0) rotate(2deg);
+  }
+}
+
+@keyframes ring {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(-12vw);
+  }
+  to {
+    transform: translateX(12vw);
+  }
+}
+
+/* Each piece reads its position, colour, timing and drift from custom properties set inline */
+@keyframes confetti {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  to {
+    transform: translate(var(--drift), 110vh) rotate(var(--turn));
+  }
+}
+
+.float {
+  animation: float 2.4s ease-in-out infinite;
+}
+.hop {
+  animation: hop 0.9s ease-in-out infinite;
+}
+.ring {
+  animation: ring 1.8s ease-out infinite;
+}
+.shake {
+  animation: shake 0.4s ease;
+}
+.pop {
+  animation: pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.rise {
+  animation: rise 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 5s ease-in-out infinite;
+}
+.drift {
+  animation: drift 60s ease-in-out infinite alternate;
+}
+
+.confetti {
+  position: absolute;
+  top: -16px;
+  left: var(--x);
+  width: 9px;
+  height: 15px;
+  border-radius: 3px;
+  background: var(--color);
+  animation: confetti var(--time) cubic-bezier(0.3, 0.55, 0.45, 1) var(--delay) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float,
+  .hop,
+  .ring,
+  .shake,
+  .pop,
+  .rise,
+  .blink,
+  .drift {
+    animation: none;
+  }
+  .confetti {
+    display: none;
+  }
+}

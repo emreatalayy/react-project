@@ -1,4 +1,4 @@
-import { Coins, Scissors, type LucideIcon } from "lucide-react";
+import { Coins, Languages, Scissors, type LucideIcon } from "lucide-react";
 
 export type Tool = {
     /** Sayfa adresi: /araclar/<slug> (dosya: app/araclar/<slug>/page.tsx) */
@@ -26,6 +26,13 @@ export const tools: Tool[] = [
         description: "Metnin güncel OpenAI modellerinde kaç token tuttuğunu, bağlam penceresini ve tahmini API maliyetini gör.",
         tags: ["OpenAI", "Maliyet", "Tarayıcıda çalışır"],
         icon: Coins,
+    },
+    {
+        slug: "ingilizce",
+        name: "Fındık ile İngilizce",
+        description: "Çocuklar için oyun gibi İngilizce: kelime eşleştir, cümle kur, dinle ve konuş; yıldız ve çıkartma topla.",
+        tags: ["İngilizce", "Çocuklar", "Tarayıcıda çalışır"],
+        icon: Languages,
     },
 ];
 
